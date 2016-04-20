@@ -1,0 +1,29 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.uk.xarixa.cloud</groupId>
+	<artifactId>java-cloud-filesystem-provider</artifactId>
+	<description>A Java filesystem provider for Java SE 7+: http://docs.oracle.com/javase/7/docs/technotes/guides/io/fsp/filesystemprovider.html</description>
+	<version>0.0.1-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	
+	<repositories>
+		<repository>
+			<id>central</id>
+			<url>http://repo1.maven.org/maven2</url>
+		</repository>
+		<!-- 
+		<repository>
+			<id>javax.net</id>
+			<name>javax.net</name>
+			<url>http://maven.java.net/</url>
+		</repository>
+		 -->
+	</repositories>
+
+	<modules>
+		<module>parent-pom</module>
+		<module>project-pom</module>
+		<module>core</module>
+	</modules>
+</project>

@@ -1,0 +1,21 @@
+grant {
+	permission java.net.SocketPermission "127.0.0.1:0-", "connect,resolve";
+	permission java.net.SocketPermission "localhost:0", "listen";
+
+	// Runtime permissions
+	permission java.lang.RuntimePermission "*";
+	
+	// Reflection permissions
+	permission java.lang.reflect.ReflectPermission "*";
+	
+	// Property permissions
+	permission java.util.PropertyPermission "*", "read";
+
+	// Required for the unit test to set up the security manager
+	permission java.util.PropertyPermission "java.security.policy", "write";
+
+	// Cloud ACL permissions for testing
+	permission com.uk.xarixa.cloud.filesystem.nio.file.attribute.CloudAclAdminPermission "aclOwners", "read,write";
+	permission com.uk.xarixa.cloud.filesystem.nio.file.attribute.CloudAclAdminPermission "aclEntries", "read,write";
+
+};
