@@ -1,7 +1,19 @@
 # java-cloud-filesystem-provider
 A Java FileSystem provider which uses JClouds for cloud connectivity. This currently supports the following Cloud environments:
 - AWS S3
-- 
+- Azure
+- OpenStack
+
+# Quickstart
+
+# Architecture
+
+
+# Extension Points
+
+
+# Integration Tests
+The integration tests can be run against
 
 # Compatibility
 - JDK 1.8 (there is some lambda code in there)
