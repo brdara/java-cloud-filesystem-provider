@@ -5,12 +5,11 @@ A Java FileSystem provider which uses JClouds for cloud connectivity. This curre
 - OpenStack
 
 # Quickstart
+Include the dependency in Maven:
 
-# Architecture
 
-
-# Extension Points
-
+# Documentation
+Find documentation in each of the sub-modules. The "core" module is the place to start.
 
 # Integration Tests
 The integration tests can be run against

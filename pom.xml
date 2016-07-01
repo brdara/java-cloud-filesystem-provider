@@ -6,19 +6,22 @@
 	<description>A Java filesystem provider for Java SE 7+: http://docs.oracle.com/javase/7/docs/technotes/guides/io/fsp/filesystemprovider.html</description>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
-	
+
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://opensource.org/licenses/MIT</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
 	<repositories>
 		<repository>
 			<id>central</id>
 			<url>http://repo1.maven.org/maven2</url>
 		</repository>
-		<!-- 
-		<repository>
-			<id>javax.net</id>
-			<name>javax.net</name>
-			<url>http://maven.java.net/</url>
-		</repository>
-		 -->
+		<!-- <repository> <id>javax.net</id> <name>javax.net</name> <url>http://maven.java.net/</url> 
+			</repository> -->
 	</repositories>
 
 	<modules>
