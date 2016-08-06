@@ -7,14 +7,12 @@ import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Terminal;
 import org.jline.terminal.TerminalBuilder;
-import org.jline.utils.Display;
 
 /**
  * Simple command-line interface for the filesystem provider
  */
 public class Cli {
 	private Terminal terminal;
-	private Display display;
 	private AtomicBoolean running = new AtomicBoolean(false);
 
 	Cli(Terminal terminal) {
