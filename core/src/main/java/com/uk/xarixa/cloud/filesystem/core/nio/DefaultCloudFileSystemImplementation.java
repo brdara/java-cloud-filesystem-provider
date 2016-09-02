@@ -27,14 +27,18 @@ import java.util.Set;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
+import org.jclouds.apis.ApiMetadata;
 import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.options.CopyOptions;
+import org.jclouds.domain.Location;
 import org.jclouds.io.ContentMetadata;
 import org.jclouds.io.ContentMetadataBuilder;
+import org.jclouds.openstack.swift.SwiftApiMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Iterables;
 import com.uk.xarixa.cloud.filesystem.core.host.configuration.CloudHostConfiguration;
 import com.uk.xarixa.cloud.filesystem.core.nio.channels.CloudFileChannel;
 import com.uk.xarixa.cloud.filesystem.core.nio.channels.CloudFileChannelTransport;
@@ -213,19 +217,37 @@ public class DefaultCloudFileSystemImplementation implements CloudFileSystemImpl
 			throw new FileAlreadyExistsException("The directory '" + dir.toAbsolutePath().toString() +
 					"' cannot be created as it already exists");
 		}
-		
-		// Check the directory has a parent
-		CloudPath parent = dir.getParent();
-		if (!parent.exists()) {
-			throw new IOException("Could not create directory '" + dir.toAbsolutePath().toString() +
-					"', the parent directory does not exist");
-		}
-		
-		checkAccess(context, parent, CREATE_DIRECTORY_STREAM_PERMS);
 
-		// File attributes don't apply here, directories are just placeholders with no access
-		context.getBlobStore().createDirectory(dir.getContainerName(), dir.getPathName());
-		LOG.debug("Created directory {}", dir);
+		// This is a container
+		if (dir.getPathName() == null) {
+			LOG.debug("Creating container '{}'...", dir.getContainerName());
+			ApiMetadata apiMetadata = context.unwrap().getProviderMetadata().getApiMetadata();
+			Location location = null;
+	        if (apiMetadata instanceof SwiftApiMetadata) {
+	            location = Iterables.getFirst(context.getBlobStore().listAssignableLocations(), null);
+	        }
+
+			if (!context.getBlobStore().createContainerInLocation(location, dir.getContainerName())) {
+				throw new IOException("Could not create container '" + dir.toAbsolutePath().toString() + "'");
+			}
+
+			LOG.debug("Created container '{}' OK", dir.getContainerName());
+		} else {
+			LOG.debug("Creating directory '{}'...", dir);
+
+			// Check the directory has a parent
+			CloudPath parent = dir.getParent();
+			if (!parent.exists()) {
+				throw new IOException("Could not create directory '" + dir.toAbsolutePath().toString() +
+						"', the parent directory does not exist");
+			}
+			
+			checkAccess(context, parent, CREATE_DIRECTORY_STREAM_PERMS);
+	
+			// File attributes don't apply here, directories are just placeholders with no access
+			context.getBlobStore().createDirectory(dir.getContainerName(), dir.getPathName());
+			LOG.debug("Created directory '{}' OK", dir);
+		}
 	}
 
 	/**

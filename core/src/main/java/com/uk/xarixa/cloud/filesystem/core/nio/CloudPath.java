@@ -42,7 +42,7 @@ public class CloudPath implements Path {
 	private final List<String> deconstructedRootPath;
 	private String originalFullPath;
 
-	public CloudPath(CloudFileSystem fileSystem, boolean isAbsolute, List<String> rootPath, List<String> fullPath) {
+	public CloudPath(CloudFileSystem fileSystem, boolean isAbsolute, List<String> rootPath, List<String> fullPath) throws CloudPathException {
 		this.deconstructedPath = fullPath;
 		this.deconstructedRootPath = rootPath;
 		this.fileSystem = fileSystem;
@@ -61,26 +61,26 @@ public class CloudPath implements Path {
 		}
 	}
 
-	public CloudPath(CloudFileSystem fileSystem, boolean isAbsolute, List<String> fullPath) {
+	public CloudPath(CloudFileSystem fileSystem, boolean isAbsolute, List<String> fullPath) throws CloudPathException {
 		this(fileSystem, isAbsolute, null, fullPath);
 	}
 
-	public CloudPath(CloudFileSystem fileSystem, boolean isAbsolute, String fullPath) {
+	public CloudPath(CloudFileSystem fileSystem, boolean isAbsolute, String fullPath) throws CloudPathException {
 		this(fileSystem, isAbsolute, deconstructPath(fullPath));
 		this.originalFullPath = StringUtils.removeEnd(fullPath, PATH_SEPARATOR);
 	}
 	
-	public CloudPath(CloudFileSystem fileSystem, boolean isAbsolute, CloudPath rootPath, String fullPath) {
+	public CloudPath(CloudFileSystem fileSystem, boolean isAbsolute, CloudPath rootPath, String fullPath) throws CloudPathException {
 		this(fileSystem, isAbsolute, rootPath.getAllPaths(), deconstructPath(fullPath));
 		this.originalFullPath = StringUtils.removeEnd(fullPath, PATH_SEPARATOR);
 	}
 
-	public CloudPath(CloudFileSystem fileSystem, boolean isAbsolute, String rootPath, String fullPath) {
+	public CloudPath(CloudFileSystem fileSystem, boolean isAbsolute, String rootPath, String fullPath) throws CloudPathException {
 		this(fileSystem, isAbsolute, deconstructPath(rootPath), deconstructPath(fullPath));
 		this.originalFullPath = StringUtils.removeEnd(fullPath, PATH_SEPARATOR);
 	}
 
-	public CloudPath(CloudPath cloudPath, String fullPath) {
+	public CloudPath(CloudPath cloudPath, String fullPath) throws CloudPathException {
 		this(cloudPath.getFileSystem(), false, cloudPath.getAllPaths(), deconstructPath(fullPath));
 	}
 
@@ -100,7 +100,13 @@ public class CloudPath implements Path {
 		}
 
 		List<String> rootPaths = new ArrayList<String>();
-		PathIterator pathIter = new PathIterator(StringUtils.removeEnd(fullPath, PATH_SEPARATOR));
+		PathIterator pathIter;
+		
+		try {
+			pathIter = new PathIterator(StringUtils.removeEnd(fullPath, PATH_SEPARATOR));
+		} catch (IllegalArgumentException e) {
+			throw new CloudPathException("The cloud path '" + fullPath + "' cannot be empty, it must at least ");
+		}
 
 		while (pathIter.hasNext()) {
 			String pathPart = pathIter.next();
@@ -517,8 +523,9 @@ public class CloudPath implements Path {
 		}
 		
 		if (!(other instanceof CloudPath)) {
-			throw new ClassCastException("Cannot compare a path of type " + other.getClass().getName() +
-					" with a " + CloudPath.class.getName());
+			return -1;
+//			throw new ClassCastException("Cannot compare a path of type " + other.getClass().getName() +
+//					" with a " + CloudPath.class.getName());
 		}
 
 		List<String> myAllPaths = getAllPaths();

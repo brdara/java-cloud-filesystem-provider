@@ -135,7 +135,16 @@ public class CloudFileAttributesView implements BasicFileAttributeView {
 	 * @throws IOException
 	 */
 	protected CloudAclFileAttributes readInternalAclFileAttributes() throws IOException {
-		if (isContainer() || isDirectory()) {
+		// Check for a container
+		if (path.getPathName() == null) {
+			if (isContainer()) {
+				return new CloudAclFileAttributes();
+			}
+
+			throw new FileNotFoundException("Unable to locate the file '" + path.getContainerName() + "|" + path.getPathName() + "'");
+		}
+
+		if (isDirectory()) {
 			return new CloudAclFileAttributes();
 		}
 
