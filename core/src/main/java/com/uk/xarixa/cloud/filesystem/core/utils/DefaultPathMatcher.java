@@ -9,6 +9,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import com.uk.xarixa.cloud.filesystem.core.nio.CloudPath;
 
+/**
+ * A {@link PathMatcher} capable of regex and glob style matches
+ */
 public class DefaultPathMatcher implements PathMatcher {
 	private final ThreadLocal<Matcher> patternMatcher;
 	

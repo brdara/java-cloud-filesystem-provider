@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.PageSet;
 import org.jclouds.blobstore.domain.StorageMetadata;
@@ -147,8 +148,8 @@ public class CloudFileSystem extends FileSystem {
 	public CloudPath getPath(String first, String... more) {
 		checkClosed();
 		List<String> pathArray = new ArrayList<>();
-		pathArray.add(first);
-		Arrays.stream(more).forEach(p -> pathArray.add(p));
+		pathArray.add(StringUtils.strip(first, "/"));
+		Arrays.stream(more).forEach(p -> pathArray.add(StringUtils.strip(p, "/")));
 		return new CloudPath(this, true, null, pathArray);
 	}
 

@@ -295,9 +295,11 @@ public class CloudFileSystemProviderDelegate extends FileSystemProvider implemen
 	@Override
 	public <A extends BasicFileAttributes> A readAttributes(Path path, Class<A> type, LinkOption... options)
 			throws IOException {
-		if (!BasicFileAttributes.class.isAssignableFrom(type) || !CloudBasicFileAttributes.class.isAssignableFrom(type)) {
-			throw new IllegalArgumentException("The class type " + type + " must be either " +
-					BasicFileAttributes.class + " or " + CloudBasicFileAttributes.class);
+		if (!BasicFileAttributes.class.isAssignableFrom(type) && !CloudBasicFileAttributes.class.isAssignableFrom(type)) {
+			throw new IllegalArgumentException("The class type " + type + "{" + type.hashCode() +
+					"} must be either " +
+					BasicFileAttributes.class + "{" + BasicFileAttributes.class.hashCode() +
+					"} or " + CloudBasicFileAttributes.class + "{" + CloudBasicFileAttributes.class.hashCode() + "}");
 		}
 
 		CloudPath cloudPath = getCloudPath(path);

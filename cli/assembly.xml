@@ -21,7 +21,7 @@
 			<outputDirectory>/</outputDirectory>
 			<includes>
 				<include>*.jar</include>
-				<include>log4j.properties</include>
+				<include>*.xml</include>
 			</includes>
 		</fileSet>
 		<fileSet>

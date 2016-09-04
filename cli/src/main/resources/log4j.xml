@@ -19,12 +19,10 @@
 	</appender>
  -->
 
-	<!--
-	<logger name="org.springframework.web" additivity="false">
+	<logger name="com.uk.xarixa.cloud.filesystem" additivity="false">
 		<level value="debug" />
 		<appender-ref ref="out" />
 	</logger>
-	 -->
 
 	<root>
 		<priority value="warn" />

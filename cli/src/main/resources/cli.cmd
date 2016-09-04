@@ -10,4 +10,4 @@ goto stripMHome
 :checkMCmd
 set CLASSWORLDS_JAR=%JCFS_HOME%\dependencies\plexus-classworlds-2.5.2.jar
 
-java -classpath %CLASSWORLDS_JAR% "-Dclassworlds.conf=%JCFS_HOME%\cli.conf" "-Djcfs.home=%JCFS_HOME%" %CLASSWORLDS_LAUNCHER%
+java -classpath %CLASSWORLDS_JAR%;%JCFS_HOME% "-Dclassworlds.conf=%JCFS_HOME%\cli.conf" "-Djcfs.home=%JCFS_HOME%" %CLASSWORLDS_LAUNCHER%
