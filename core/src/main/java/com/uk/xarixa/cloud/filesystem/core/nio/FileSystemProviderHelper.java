@@ -20,8 +20,12 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Function;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -93,8 +97,8 @@ public final class FileSystemProviderHelper {
 	 */
 	public static boolean ensureDirectoriesExist(Path dir) {
     	FileSystemProvider provider = dir.getFileSystem().provider();
-		// System.out.println("Root: " + dir.getRoot());
 		Path rootContainer = dir.getRoot();
+
 		if (!Files.exists(rootContainer)) {
 			LOG.debug("Attempting to create root container '{}'", rootContainer);
 
@@ -109,13 +113,13 @@ public final class FileSystemProviderHelper {
 
 		// Ensure container exists
 		Iterator<Path> pathIter = dir.toAbsolutePath().iterator();
-		
+
 		while (pathIter.hasNext()) {
 			Path path = pathIter.next();
 
 			if (!Files.isDirectory(path)) {
 				LOG.debug("Attempting to create directory '{}'", path);
-	
+
 		    	try {
 					provider.createDirectory(path);
 					LOG.debug("Created directory '{}'", path);
@@ -137,49 +141,62 @@ public final class FileSystemProviderHelper {
 	 * @param destinationPath
 	 * @return
 	 */
-	public static int copyDirectoryBetweenProviders(Path sourcePath, Path destinationPath) {
-		// Work out the new path at the destination
+	public static int copyDirectoryBetweenProviders(Path sourcePath, Path destinationPath, Filter<Path> pathFilter,
+			boolean recursive) {
+		// Work out the new path at the destination and make sure the directories exist
+		final String sourceFsSeparator = sourcePath.getFileSystem().getSeparator();
+		final FileSystem destinationFileSystem = destinationPath.getFileSystem();
+		final String destinationFsSeparator = destinationFileSystem.getSeparator();
+		StringBuilder newDestinationPathString = new StringBuilder(destinationPath.toAbsolutePath().toString())
+				.append(destinationFsSeparator)
+				.append(sourcePath.getFileName().toString());
 		Path newDestinationPathDir =
-				destinationPath.getFileSystem().getPath(
-						destinationPath.toAbsolutePath().toString(),
-						sourcePath.getName(-1).toString());
+				destinationFileSystem.getPath(newDestinationPathString.toString());
 		ensureDirectoriesExist(newDestinationPathDir);
 
-		FileSystemProvider provider = sourcePath.getFileSystem().provider();
+		AtomicInteger pathsCopied = new AtomicInteger(0);
+		iterateOverDirectoryContents(sourcePath.getFileSystem(), Optional.ofNullable(sourcePath), pathFilter,
+				recursive, subPath -> {
+					Optional<Path> relativeSourcePath = subPath.getRelativeSourcePath();
+					StringBuilder destinationPathString = new StringBuilder(newDestinationPathDir.toString())
+							.append(destinationFsSeparator);
+					
+					// Append the relative path if it exists
+					if (relativeSourcePath.isPresent()) {
+						if (sourceFsSeparator.equals(destinationFsSeparator)) {
+							destinationPathString.append(relativeSourcePath.get().toString())
+								.append(destinationFsSeparator);
+						} else {
+							destinationPathString.append(
+									StringUtils.replace(relativeSourcePath.get().toString(),
+											sourceFsSeparator, destinationFsSeparator))
+								.append(destinationFsSeparator);
+						}
+					}
 
-		// Directory listing
-		DirectoryStream<Path> dirStream;
-		try {
-			dirStream = provider.newDirectoryStream(sourcePath, new Filter<Path>() {
-				@Override
-				public boolean accept(Path entry) throws IOException {
+					destinationPathString.append(subPath.getResultPath().getFileName());
+					Path copyPath = destinationFileSystem.getPath(destinationPathString.toString());
+					LOG.debug("Created destination path {} (dest root={}, relative={}, name={})", destinationPathString,
+							newDestinationPathDir,
+							relativeSourcePath.isPresent() ? relativeSourcePath.get() : "N/A",
+							subPath.getResultPath().getFileName());
+
+					if (Files.isDirectory(subPath.getResultPath())) {
+						if (recursive) {
+							// Create the dir
+							ensureDirectoriesExist(copyPath);
+						}
+					} else {
+						// Copy the content
+						if (copyFileBetweenProviders(subPath.getResultPath(), copyPath) == 1) {
+							pathsCopied.incrementAndGet();
+						}
+					}
+
 					return true;
-				}
-			});
-		} catch (Exception e) {
-			LOG.error("Could not list directories for path '{}", sourcePath, e);
-			return 0;
-		}
+				});
 
-		// For each result in the dir, copy each file
-		int pathsCounter = 0;
-		Iterator<Path> paths = dirStream.iterator();
-		while (paths.hasNext()) {
-			Path nextPath = paths.next();
-
-			if (Files.isDirectory(nextPath)) {
-				LOG.debug("Non-recursive copy specified, skipping directory '" + nextPath + "'");
-			} else {
-				Path copyPath = destinationPath.getFileSystem().getPath(
-						newDestinationPathDir.toString(),
-						nextPath.getFileName().toString());
-				if (copyFileUsingDestinationProvider(nextPath, copyPath) == 1) {
-					pathsCounter++;
-				}
-			}
-		}
-
-		return pathsCounter;
+		return pathsCopied.get();
 	}
 
 	/**
@@ -190,7 +207,7 @@ public final class FileSystemProviderHelper {
 	 * @param destinationPath
 	 * @return
 	 */
-	public static int copyFileUsingDestinationProvider(Path sourcePath, Path destinationPath) {
+	public static int copyFileBetweenProviders(Path sourcePath, Path destinationPath) {
 		LOG.debug("Copying source file {} -> {}", sourcePath, destinationPath);
 		
 		// Get the providers
@@ -217,6 +234,158 @@ public final class FileSystemProviderHelper {
 		
 		LOG.debug("Transferred " + readSize + " bytes from '" + sourcePath + "' to '" + destinationPath + "'");
 		return 1;
+	}
+
+	/**
+	 * Iterates across a directory's contents
+	 * @param path				An optional path. If the option is empty then iterate's over
+	 * 							{@link FileSystem#getRootDirectories() root directories}
+	 * @param pathFilter		Filter used in the {@link FileSystemProvider#newDirectoryStream(Path, Filter)} call
+	 * @param recursiveListing	Whether to follow directories recursively
+	 * @param directoryContentAction	A function which consumes the path and returns a boolean, indicating whether traversal
+	 * 									should continue or not.
+	 * @return true if traversal completed, false if this was cancelled.
+	 */
+	public static boolean iterateOverDirectoryContents(FileSystem fileSystem, Optional<Path> path, Filter<Path> pathFilter,
+			boolean recursiveListing, Function<DirectoryIterationPaths,Boolean> directoryContentAction) {
+		// If there is no path then provide a listing for the root directories
+		if (!path.isPresent()) {
+			Iterable<Path> rootDirectories = fileSystem.getRootDirectories();
+			for (Path rootDir : rootDirectories) {
+				DirectoryIterationPaths iterationPaths = new DirectoryIterationPaths(rootDir, null, rootDir);
+				if (!directoryContentAction.apply(iterationPaths)) {
+					return false;
+				}
+
+				// Recurse through subdirs as required
+				if (recursiveListing && Files.isDirectory(rootDir)) {
+					if (!iterateOverDirectoryContents(fileSystem, iterationPaths, pathFilter,
+							recursiveListing, directoryContentAction)) {
+						return false;
+					}
+				}
+			}
+			
+			//All successful
+			return true;
+		} else {
+			DirectoryIterationPaths iterationPaths = new DirectoryIterationPaths(path.get(), null, path.get());
+			return iterateOverDirectoryContents(fileSystem, iterationPaths, pathFilter, recursiveListing,
+					directoryContentAction);
+		}
+	}
+	
+	private static boolean iterateOverDirectoryContents(FileSystem fileSystem, DirectoryIterationPaths dirIterationPaths,
+			Filter<Path> pathFilter, boolean recursiveListing, Function<DirectoryIterationPaths,Boolean> directoryContentAction) {
+		Path path = dirIterationPaths.getResultPath();
+		boolean printRecursive;
+		FileSystemProvider provider = fileSystem.provider();
+		DirectoryStream<Path> dirStream;
+
+		// Directory listing
+		try {
+			
+			if (recursiveListing && provider instanceof CloudFileSystemProvider) {
+				// The CloudFileSystemProvider type is capable of providing a recursive listing,
+				// use this for efficiency if possible
+				LOG.debug("Using optimised cloud file system provider for recursive file listing");
+				dirStream = ((CloudFileSystemProvider)provider).newDirectoryStream(path, pathFilter, true);
+				printRecursive = false;
+			} else {
+				// Fallback to using recursive printing of the file listing when a directory is encountered
+				dirStream = provider.newDirectoryStream(path, pathFilter);
+				printRecursive = recursiveListing;
+			}
+		} catch (Exception e) {
+			LOG.error("Could not list directories for path '{}'", path, e);
+			return false;
+		}
+
+		// For each result in the dir 
+		Iterator<Path> paths = dirStream.iterator();
+		while (paths.hasNext()) {
+			Path nextPath = paths.next();
+			DirectoryIterationPaths nextDirIterationPaths =
+					new DirectoryIterationPaths(dirIterationPaths, nextPath);
+			LOG.debug("Iterating through next path {}", nextPath);
+			
+			// Can throw CancelException to terminate recursion/listing
+			if (!directoryContentAction.apply(nextDirIterationPaths)) {
+				return false;
+			}
+
+			// Recurse through subdirs as required
+			if (printRecursive && Files.isDirectory(nextPath)) {
+				if (!iterateOverDirectoryContents(fileSystem, nextDirIterationPaths, pathFilter,
+						printRecursive, directoryContentAction)) {
+					return false;
+				}
+			}
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Parameter passed into the function which is passed into
+	 * {@link FileSystemProviderHelper#iterateOverDirectoryContents(FileSystem, Optional, Filter, boolean, Function)}.
+	 * <ul>
+	 * <li><em>iterationStartPath</em> is the path which the iterative process started from, i.e. the first
+	 * invocation of {@link FileSystemProviderHelper#iterateOverDirectoryContents(FileSystem, Optional, Filter, boolean, Function)}.</li>
+	 * <li><em>sourcePath</em> is the container or directory which was traversed and contains the <em>resultPath</em>.</li>
+	 * <li><em>resultPath</em> is the path to iterate over.</li>
+	 * </ul>
+	 */
+	public static final class DirectoryIterationPaths {
+		private final Path iterationStartPath;
+		private final Path sourcePath;
+		private final Path resultPath;
+
+		public DirectoryIterationPaths(DirectoryIterationPaths sourceDirectoryIterationPaths, Path resultPath) {
+			this(sourceDirectoryIterationPaths.iterationStartPath,
+					sourceDirectoryIterationPaths.resultPath, resultPath);
+		}
+
+		public DirectoryIterationPaths(Path iterationStartPath, Path sourcePath, Path resultPath) {
+			this.iterationStartPath = iterationStartPath;
+			this.sourcePath = sourcePath;
+			this.resultPath = resultPath;
+		}
+		
+		public Path getIterationStartPath() {
+			return iterationStartPath;
+		}
+
+		public Path getSourcePath() {
+			return sourcePath;
+		}
+
+		public Path getResultPath() {
+			return resultPath;
+		}
+
+		/**
+		 * This gives the relative source path from the <em>iterationStartPath</em> to the <em>sourcePath</em>
+		 * in the <em>targetFs</em>'s filesystem.
+		 * For example if the <em>iterationStartPath</em> is <strong>/root/start</strong> and the <em>sourcePath</em> is
+		 * <strong>/root/start/source</strong> then the relative path result is <em>start/source</em>.
+		 * This is useful for things such as copy operations where you wish to know the relative path of this iteration.
+		 * 
+		 * @return A null-valued {@link Optional} with not value if there is not relative subpath or an {@link Optional}
+		 */
+		public Optional<Path> getRelativeSourcePath() {
+			int startPathRelativeIndex = iterationStartPath == null ? 0 : iterationStartPath.getNameCount();
+
+			// There is no difference
+			if (sourcePath.getNameCount() == startPathRelativeIndex) {
+				return Optional.empty();
+			}
+
+			String startPathName = sourcePath.toAbsolutePath()
+						.subpath(startPathRelativeIndex, sourcePath.getNameCount()).toString();
+			
+			return Optional.of(resultPath.getFileSystem().getPath(startPathName));
+		}
 	}
 
 }

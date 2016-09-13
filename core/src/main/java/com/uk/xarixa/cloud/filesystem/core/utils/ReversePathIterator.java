@@ -15,12 +15,12 @@ public class ReversePathIterator implements Iterator<String> {
 	private int startIndex;
 
 	public ReversePathIterator(String path) {
-		if (StringUtils.isBlank(path) || StringUtils.equals(path, CloudPath.PATH_SEPARATOR)) {
+		if (StringUtils.isBlank(path) || StringUtils.equals(path, CloudPath.DEFAULT_PATH_SEPARATOR)) {
 			throw new IllegalArgumentException("Cannot iterate over an empty path: '" + path + "'");
 		}
 
 		this.path = path;
-		this.startIndex = path.endsWith(CloudPath.PATH_SEPARATOR) ? path.length() - 2 : path.length() - 1;
+		this.startIndex = path.endsWith(CloudPath.DEFAULT_PATH_SEPARATOR) ? path.length() - 2 : path.length() - 1;
 	}
 
 	@Override
@@ -34,7 +34,7 @@ public class ReversePathIterator implements Iterator<String> {
 			throw new NoSuchElementException();
 		}
 
-		int foundSeparator = reverseIndexOf(path, CloudPath.PATH_SEPARATOR_CHAR, startIndex);
+		int foundSeparator = reverseIndexOf(path, CloudPath.DEFAULT_PATH_SEPARATOR_CHAR, startIndex);
 		String pathPart;
 		
 		if (foundSeparator == -1) {

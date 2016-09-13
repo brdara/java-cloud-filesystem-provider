@@ -113,7 +113,7 @@ public class CloudFileSystem extends FileSystem {
 
 	@Override
 	public String getSeparator() {
-		return CloudPath.PATH_SEPARATOR;
+		return CloudPath.DEFAULT_PATH_SEPARATOR;
 	}
 
 	/**
@@ -147,10 +147,16 @@ public class CloudFileSystem extends FileSystem {
 	@Override
 	public CloudPath getPath(String first, String... more) {
 		checkClosed();
-		List<String> pathArray = new ArrayList<>();
-		pathArray.add(StringUtils.strip(first, "/"));
-		Arrays.stream(more).forEach(p -> pathArray.add(StringUtils.strip(p, "/")));
-		return new CloudPath(this, true, null, pathArray);
+		
+		if (more != null && more.length > 0) {
+			List<String> pathArray = new ArrayList<>();
+			pathArray.add(StringUtils.strip(first, getSeparator()));
+			Arrays.stream(more).forEach(p -> pathArray.add(StringUtils.strip(p, getSeparator())));
+			return new CloudPath(this, true, null, pathArray);
+		} else {
+			// First is a string containing the paths
+			return new CloudPath(this, true, null, Arrays.asList(StringUtils.split(first, getSeparator())));
+		}
 	}
 
 	@Override

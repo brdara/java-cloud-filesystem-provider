@@ -858,7 +858,7 @@ public class DefaultCloudFileSystemImplementationIntegrationTest extends Abstrac
 
 
 	public void assertNotExists(String path) throws IOException {
-		assertNotExists(new CloudPath(fileSystem, true, CONTAINER_NAME + CloudPath.PATH_SEPARATOR + path));
+		assertNotExists(new CloudPath(fileSystem, true, CONTAINER_NAME + CloudPath.DEFAULT_PATH_SEPARATOR + path));
 	}
 
 	public void assertNotExists(CloudPath cloudPath) throws IOException {
@@ -875,7 +875,7 @@ public class DefaultCloudFileSystemImplementationIntegrationTest extends Abstrac
 	}
 	
 	public void assertFileExists(String filePath) throws IOException {
-		assertFileExists(new CloudPath(fileSystem, true, CONTAINER_NAME + CloudPath.PATH_SEPARATOR + filePath));
+		assertFileExists(new CloudPath(fileSystem, true, CONTAINER_NAME + CloudPath.DEFAULT_PATH_SEPARATOR + filePath));
 	}
 	
 	public void assertDirectoryExists(CloudPath cloudPath) throws IOException {
@@ -883,7 +883,7 @@ public class DefaultCloudFileSystemImplementationIntegrationTest extends Abstrac
 	}
 
 	public void assertDirectoryExists(String dirPath) throws IOException {
-		assertDirectoryExists(new CloudPath(fileSystem, true, CONTAINER_NAME + CloudPath.PATH_SEPARATOR + dirPath));
+		assertDirectoryExists(new CloudPath(fileSystem, true, CONTAINER_NAME + CloudPath.DEFAULT_PATH_SEPARATOR + dirPath));
 	}
 
 }

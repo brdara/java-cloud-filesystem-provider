@@ -40,11 +40,11 @@ public class DefaultPathMatcher implements PathMatcher {
 					i = nextCharIndex;
 				} else {
 					// Glob: *
-					regex.append("[^" + CloudPath.PATH_SEPARATOR_CHAR + "]*");
+					regex.append("[^" + CloudPath.DEFAULT_PATH_SEPARATOR_CHAR + "]*");
 				}
 			} else if (character == '?') {
 				// Glob: ?
-				regex.append("[^" + CloudPath.PATH_SEPARATOR_CHAR + "]");
+				regex.append("[^" + CloudPath.DEFAULT_PATH_SEPARATOR_CHAR + "]");
 			} else if (character == '[') {
 				// Glob: [ABCa-z]
 				// Extract the rest of the expression

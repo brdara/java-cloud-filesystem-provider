@@ -502,7 +502,8 @@ public class DefaultCloudFileSystemImplementation implements CloudFileSystemImpl
 				}
 				
 				// Check for non-empty target dir and recursive copy not specified
-				if (!options.contains(CloudCopyOption.RECURSIVE) && newDirectoryStream(context, target, null).iterator().hasNext()) {
+				if (!options.contains(CloudCopyOption.RECURSIVE) &&
+						newDirectoryStream(context, target, null).iterator().hasNext()) {
 					throw new DirectoryNotEmptyException("The target directory '" + target.toAbsolutePath() +
 							"' is not empty and the recursive copy option has not been specified");
 				}

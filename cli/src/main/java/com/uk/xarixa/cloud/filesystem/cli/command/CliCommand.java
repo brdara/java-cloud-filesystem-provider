@@ -8,12 +8,18 @@ public interface CliCommand {
 	 * Returns the name of this command
 	 */
 	String getCommandName();
-	
+
 	/**
-	 * Prints help information about this command
+	 * Prints summary help information (a one-liner) about this command
 	 * @param out
 	 */
-	void printHelp(PrintWriter out);
+	void printSummaryHelp(PrintWriter out);
+	
+	/**
+	 * Prints detailed help information about this command
+	 * @param out
+	 */
+	void printFullHelp(PrintWriter out);
 
 	/**
 	 * Exceutes the command

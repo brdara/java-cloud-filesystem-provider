@@ -31,8 +31,8 @@ import com.uk.xarixa.cloud.filesystem.core.utils.PathIterator;
  * Implementation of {@link Path} for cloud based filesystems.
  */
 public class CloudPath implements Path {
-	public static final char PATH_SEPARATOR_CHAR = '/';
-	public static final String PATH_SEPARATOR = "/";
+	public static final char DEFAULT_PATH_SEPARATOR_CHAR = '/';
+	public static final String DEFAULT_PATH_SEPARATOR = new String(new char[] {DEFAULT_PATH_SEPARATOR_CHAR});
 	private static final Modifier[] EMPTY_MODIFIERS_ARRAY = new Modifier[0];
 	private static final Logger LOG = LoggerFactory.getLogger(CloudPath.class);
 	private final CloudFileSystem fileSystem;
@@ -41,14 +41,14 @@ public class CloudPath implements Path {
 	private final List<String> deconstructedPath;
 	private final List<String> deconstructedRootPath;
 	private String originalFullPath;
-
+	
 	public CloudPath(CloudFileSystem fileSystem, boolean isAbsolute, List<String> rootPath, List<String> fullPath) throws CloudPathException {
 		this.deconstructedPath = fullPath;
 		this.deconstructedRootPath = rootPath;
 		this.fileSystem = fileSystem;
 		this.isAbsolute = isAbsolute;
 		this.isRoot = isRootPath();
-		this.originalFullPath = PATH_SEPARATOR + StringUtils.join(fullPath, PATH_SEPARATOR);
+		this.originalFullPath = DEFAULT_PATH_SEPARATOR + StringUtils.join(fullPath, DEFAULT_PATH_SEPARATOR);
 
 		// No root path means we just add a slash to this
 //		if (!isAbsolute && (rootPath == null || rootPath.isEmpty())) {
@@ -57,7 +57,7 @@ public class CloudPath implements Path {
 		
 		if (deconstructedPath == null || deconstructedPath.isEmpty()) {
 			throw new IllegalArgumentException("Cannot get a root path from path elements " + originalFullPath +
-					", it must start with " + PATH_SEPARATOR + " and have at least 1 path element");
+					", it must start with " + DEFAULT_PATH_SEPARATOR + " and have at least 1 path element");
 		}
 	}
 
@@ -67,17 +67,17 @@ public class CloudPath implements Path {
 
 	public CloudPath(CloudFileSystem fileSystem, boolean isAbsolute, String fullPath) throws CloudPathException {
 		this(fileSystem, isAbsolute, deconstructPath(fullPath));
-		this.originalFullPath = StringUtils.removeEnd(fullPath, PATH_SEPARATOR);
+		this.originalFullPath = StringUtils.removeEnd(fullPath, DEFAULT_PATH_SEPARATOR);
 	}
 	
 	public CloudPath(CloudFileSystem fileSystem, boolean isAbsolute, CloudPath rootPath, String fullPath) throws CloudPathException {
 		this(fileSystem, isAbsolute, rootPath.getAllPaths(), deconstructPath(fullPath));
-		this.originalFullPath = StringUtils.removeEnd(fullPath, PATH_SEPARATOR);
+		this.originalFullPath = StringUtils.removeEnd(fullPath, DEFAULT_PATH_SEPARATOR);
 	}
 
 	public CloudPath(CloudFileSystem fileSystem, boolean isAbsolute, String rootPath, String fullPath) throws CloudPathException {
 		this(fileSystem, isAbsolute, deconstructPath(rootPath), deconstructPath(fullPath));
-		this.originalFullPath = StringUtils.removeEnd(fullPath, PATH_SEPARATOR);
+		this.originalFullPath = StringUtils.removeEnd(fullPath, DEFAULT_PATH_SEPARATOR);
 	}
 
 	public CloudPath(CloudPath cloudPath, String fullPath) throws CloudPathException {
@@ -103,9 +103,10 @@ public class CloudPath implements Path {
 		PathIterator pathIter;
 		
 		try {
-			pathIter = new PathIterator(StringUtils.removeEnd(fullPath, PATH_SEPARATOR));
+			pathIter = new PathIterator(StringUtils.removeEnd(fullPath, DEFAULT_PATH_SEPARATOR));
 		} catch (IllegalArgumentException e) {
-			throw new CloudPathException("The cloud path '" + fullPath + "' cannot be empty, it must at least ");
+			throw new CloudPathException("The cloud path '" + fullPath + "' cannot be empty, it must "
+					+ "contain at least one path element");
 		}
 
 		while (pathIter.hasNext()) {
@@ -333,7 +334,7 @@ public class CloudPath implements Path {
 
 	@Override
 	public boolean startsWith(String other) {
-		List<String> deconstructedPath = deconstructPath(StringUtils.removeEnd(other, PATH_SEPARATOR));
+		List<String> deconstructedPath = deconstructPath(StringUtils.removeEnd(other, DEFAULT_PATH_SEPARATOR));
 		return startsWithInternal(deconstructedPath);
 	}
 
@@ -360,7 +361,7 @@ public class CloudPath implements Path {
 
 	@Override
 	public boolean endsWith(String other) {
-		List<String> deconstructedPath = deconstructPath(StringUtils.removeEnd(other, PATH_SEPARATOR));
+		List<String> deconstructedPath = deconstructPath(StringUtils.removeEnd(other, DEFAULT_PATH_SEPARATOR));
 		return endsWithInternal(deconstructedPath);
 	}
 
@@ -404,7 +405,7 @@ public class CloudPath implements Path {
 
 	@Override
 	public Path resolve(String other) {
-		return resolveInternal(new CloudPath(this.fileSystem, other.startsWith(PATH_SEPARATOR), other));
+		return resolveInternal(new CloudPath(this.fileSystem, other.startsWith(DEFAULT_PATH_SEPARATOR), other));
 	}
 
 	@Override
@@ -559,8 +560,8 @@ public class CloudPath implements Path {
 
 	@Override
 	public String toString() {
-		return (isAbsolute ? PATH_SEPARATOR : "") +
-				StringUtils.join(constructPath(deconstructedPath, 0, deconstructedPath.size()), PATH_SEPARATOR);
+		return (isAbsolute ? DEFAULT_PATH_SEPARATOR : "") +
+				StringUtils.join(constructPath(deconstructedPath, 0, deconstructedPath.size()), DEFAULT_PATH_SEPARATOR);
 	}
 	
 	/**

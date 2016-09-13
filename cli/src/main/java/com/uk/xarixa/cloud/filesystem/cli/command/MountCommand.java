@@ -28,7 +28,12 @@ public class MountCommand implements CliCommand {
 	}
 
 	@Override
-	public void printHelp(PrintWriter out) {
+	public void printSummaryHelp(PrintWriter out) {
+		out.println("Mounts a cloud based filesystem");
+	}
+
+	@Override
+	public void printFullHelp(PrintWriter out) {
 		out.println("Mounts a cloud based filesystem using the specified parameters.");
 		out.println("\t- Mount an AWS S3 cloud filesystem as 's3-host':");
 		out.println("\t\tmount s3-host AWS accessKey=XXXXXXXXXXX secretKey=XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX");

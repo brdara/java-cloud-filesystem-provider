@@ -9,16 +9,23 @@ import java.nio.file.Path;
 import java.nio.file.ProviderMismatchException;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.spi.FileSystemProvider;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Lists;
 import com.uk.xarixa.cloud.filesystem.cli.Cli;
+import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.ParsedCommand;
+import com.uk.xarixa.cloud.filesystem.core.nio.CloudFileSystemProvider;
 import com.uk.xarixa.cloud.filesystem.core.nio.CloudPathException;
 import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper;
+import com.uk.xarixa.cloud.filesystem.core.nio.options.CloudCopyOption;
 
-public class CopyCommand implements CliCommand {
+public class CopyCommand extends AbstractCliCommand {
 	private static final Logger LOG = LoggerFactory.getLogger(CopyCommand.class);
+	private static final String RECURSIVE_OPTION = "recursive";
+	private static final List<String> options = Lists.newArrayList(RECURSIVE_OPTION);
 
 	@Override
 	public String getCommandName() {
@@ -26,18 +33,38 @@ public class CopyCommand implements CliCommand {
 	}
 
 	@Override
-	public void printHelp(PrintWriter out) {
+	public void printSummaryHelp(PrintWriter out) {
+		out.println("Copies files or directories");
+	}
+
+	@Override
+	public void printFullHelp(PrintWriter out) {
 		out.println("Copies one or more files or directories from a filesystem to another filesystem");
 	}
 
 	@Override
-	public boolean execute(String[] commandArguments) {
-    	if (commandArguments.length < 3) {
-    		System.err.println("Not enough arguments");
-    		return false;
-    	}
-    	
-    	String destination = commandArguments[commandArguments.length - 1];
+	public List<String> getCommandOptions() {
+		return options;
+	}
+
+	@Override
+	public int getMinimumNumberOfParameters() {
+		return 2;
+	}
+
+	@Override
+	public int getMaximumNumberOfParameters() {
+		return -1;
+	}
+
+	@Override
+	public boolean executeCommand(ParsedCommand parsedCommand) {
+		boolean recursive = parsedCommand.getCommandOptions().contains(RECURSIVE_OPTION);
+
+		// Get the destination from the final parameter
+		List<String> commandParameters = parsedCommand.getCommandParameters();
+    	String destination = commandParameters.get(commandParameters.size() - 1);
+
     	URI destinationUri;
     	try {
     		destinationUri = new URI(destination);
@@ -46,12 +73,12 @@ public class CopyCommand implements CliCommand {
     		return false;
 		}
 
-    	for (int i=1; i<commandArguments.length - 1; i++) {
+    	for (int i=0; i<commandParameters.size() - 1; i++) {
 	    	URI sourceUri;
 	    	try {
-				sourceUri = new URI(commandArguments[i]);
+				sourceUri = new URI(commandParameters.get(i));
 			} catch (URISyntaxException e) {
-				System.err.println("Could not parse filesystem URI '" + commandArguments[i] + "': " + e.getMessage());
+				System.err.println("Could not parse filesystem URI '" + commandParameters.get(i) + "': " + e.getMessage());
 	    		return false;
 			}
 	
@@ -80,8 +107,13 @@ public class CopyCommand implements CliCommand {
 	    	}
 
 	    	try {
-	    		sourceProvider.copy(sourcePath, destinationPath,
-	    			StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+	    		if (recursive && sourceProvider instanceof CloudFileSystemProvider) {
+		    		sourceProvider.copy(sourcePath, destinationPath,
+			    			StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, CloudCopyOption.RECURSIVE);
+	    		} else {
+		    		sourceProvider.copy(sourcePath, destinationPath,
+		    			StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+	    		}
 	    	} catch (ProviderMismatchException e) {
 	    		LOG.debug("Source provider with scheme {} cannot perform copy to {}, falling back to manual copy",
 	    				sourceProvider.getScheme(), destinationProvider.getScheme());
@@ -90,9 +122,10 @@ public class CopyCommand implements CliCommand {
 		    	// Windows FS provider implemenation doesn't let you copy using it as the source
 	    		// to another destintation provider implementation like our cloud one, da-da-dumb
 	    		if (Files.isDirectory(sourcePath)) {
-	    			filesCopied = FileSystemProviderHelper.copyDirectoryBetweenProviders(sourcePath, destinationPath);
+	    			filesCopied = FileSystemProviderHelper.copyDirectoryBetweenProviders(sourcePath,
+	    					destinationPath, ListCommand.acceptAllFilter, recursive);
 	    		} else {
-	    			filesCopied = FileSystemProviderHelper.copyFileUsingDestinationProvider(sourcePath, destinationPath);
+	    			filesCopied = FileSystemProviderHelper.copyFileBetweenProviders(sourcePath, destinationPath);
 	    		}
 	    		
 	    		System.out.println(filesCopied + " files copied");
@@ -106,6 +139,5 @@ public class CopyCommand implements CliCommand {
 
     	return true;
 	}
-
 
 }

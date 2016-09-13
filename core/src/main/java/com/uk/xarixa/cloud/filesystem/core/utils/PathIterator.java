@@ -15,12 +15,12 @@ public class PathIterator implements Iterator<String> {
 	private int startIndex;
 
 	public PathIterator(String path) {
-		if (StringUtils.isBlank(path) || StringUtils.equals(path, CloudPath.PATH_SEPARATOR)) {
+		if (StringUtils.isBlank(path) || StringUtils.equals(path, CloudPath.DEFAULT_PATH_SEPARATOR)) {
 			throw new IllegalArgumentException("Cannot iterate over an empty path: '" + path + "'");
 		}
 
 		this.path = path;
-		this.startIndex = path.startsWith(CloudPath.PATH_SEPARATOR) ? 1 : 0;
+		this.startIndex = path.startsWith(CloudPath.DEFAULT_PATH_SEPARATOR) ? 1 : 0;
 	}
 
 	@Override
@@ -34,7 +34,7 @@ public class PathIterator implements Iterator<String> {
 			throw new NoSuchElementException();
 		}
 
-		int foundSeparator = StringUtils.indexOf(path, CloudPath.PATH_SEPARATOR_CHAR, startIndex);
+		int foundSeparator = StringUtils.indexOf(path, CloudPath.DEFAULT_PATH_SEPARATOR_CHAR, startIndex);
 		String pathPart;
 		
 		if (foundSeparator == -1) {

@@ -38,10 +38,10 @@ public class CloudFileSystemIntegrationTest extends AbstractJCloudsIntegrationTe
 		impl.getRootDirectories().forEach(d -> pathNames.add(d.toAbsolutePath().toString()));
 		Assert.assertEquals(3, pathNames.size());
 		Assert.assertTrue("Could not find path name " + CONTAINER_NAME + ": " + pathNames,
-				pathNames.contains(CloudPath.PATH_SEPARATOR + CONTAINER_NAME));
+				pathNames.contains(CloudPath.DEFAULT_PATH_SEPARATOR + CONTAINER_NAME));
 		Arrays.stream(containers).forEach(c ->
 			Assert.assertTrue("Could not find path name " + c + ": " + pathNames,
-					pathNames.contains(CloudPath.PATH_SEPARATOR + c)));
+					pathNames.contains(CloudPath.DEFAULT_PATH_SEPARATOR + c)));
 	}
 
 }

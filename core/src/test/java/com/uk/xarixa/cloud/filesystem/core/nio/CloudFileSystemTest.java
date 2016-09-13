@@ -57,6 +57,12 @@ public class CloudFileSystemTest {
 	}
 
 	@Test
+	public void testGetPathCreatesAPathFromASingleArgument() {
+		Assert.assertEquals("/root/subdir1", impl.getPath("/root/subdir1/").toString());
+		Assert.assertEquals("/root/subdir1/subdir2", impl.getPath("/root/subdir1/subdir2/").toString());
+	}
+
+	@Test
 	public void testGetUserPrincipalLookupServiceThrowsAnExceptionWhenTheServiceIsNull() {
 		context.checking(new Expectations() {{
 			allowing(cloudHostSettings).getUserPrincipalLookupService();

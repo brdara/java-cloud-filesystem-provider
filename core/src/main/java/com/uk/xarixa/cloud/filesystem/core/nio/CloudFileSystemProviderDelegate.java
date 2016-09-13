@@ -122,13 +122,20 @@ public class CloudFileSystemProviderDelegate extends FileSystemProvider implemen
 		 return (CloudPath)path;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public DirectoryStream<Path> newDirectoryStream(Path dir, Filter<? super Path> filter) throws IOException {
+		return newDirectoryStream(dir, filter, false);
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public DirectoryStream<Path> newDirectoryStream(Path dir, Filter<? super Path> filter, boolean isRecursive)
+			throws IOException {
 		CloudPath cloudPath = getCloudPath(dir);
 		CloudFileSystemImplementation cloudFileSystemImplementation = getCloudFileSystemImplementation(cloudPath);
 		CloudDirectoryStream newDirectoryStream =
-				cloudFileSystemImplementation.newDirectoryStream(getBlobStoreContext(cloudPath), cloudPath, (Filter)filter);
+				cloudFileSystemImplementation.newDirectoryStream(getBlobStoreContext(cloudPath), cloudPath,
+						(Filter)filter, isRecursive);
 		return (DirectoryStream)newDirectoryStream;
 	}
 

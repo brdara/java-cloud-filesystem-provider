@@ -38,7 +38,7 @@ public class Cli {
 
 	Cli(Terminal terminal) {
         this.terminal = terminal;
-        cliCommands.add(new HelpCommand(new PrintWriter(System.out), cliCommands));
+        cliCommands.add(new HelpCommand(new PrintWriter(System.out, true), cliCommands));
 	}
 	
 	void run() {
@@ -88,6 +88,7 @@ public class Cli {
 			if (cliCommand.getCommandName().equals(arguments[0])) {
 				if (!cliCommand.execute(arguments)) {
 					// Do something on failure of the command
+					LOG.warn("Command failed");
 				}
 				return true;
 			}

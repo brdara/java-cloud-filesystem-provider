@@ -4,8 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class CliCommandHelper {
+	private static final Logger LOG = LoggerFactory.getLogger(CliCommandHelper.class);
 
 	private CliCommandHelper() {
 		throw new UnsupportedOperationException();
@@ -15,7 +18,7 @@ public final class CliCommandHelper {
 		private final List<String> commandOptions = new ArrayList<String>(2);
 		private final List<String> commandParameters = new ArrayList<String>(2);
 
-		ParsedCommand(String[] arguments, String optionPrefix) {
+		ParsedCommand(List<String> allowedOptions, String[] arguments, String optionPrefix) {
 			boolean inOptions = true;
 
 			for (int i=1; i<arguments.length; i++) {
@@ -23,7 +26,12 @@ public final class CliCommandHelper {
 
 				if (inOptions) {
 					if (arg.startsWith(optionPrefix)) {
-						commandOptions.add(StringUtils.removeStart(arg, optionPrefix));
+						String option = StringUtils.removeStart(arg, optionPrefix);
+						if (allowedOptions.contains(option)) {
+							commandOptions.add(option);
+						} else {
+							LOG.warn("Command option {} not recognised, skipping", option);
+						}
 					} else {
 						inOptions = false;
 					}
@@ -45,8 +53,8 @@ public final class CliCommandHelper {
 
 	}
 
-	public final static ParsedCommand parseCommand(String[] arguments, String optionPrefix) {
-		return new ParsedCommand(arguments, optionPrefix);
+	public final static ParsedCommand parseCommand(List<String> allowedOptions, String[] arguments, String optionPrefix) {
+		return new ParsedCommand(allowedOptions, arguments, optionPrefix);
 	}
 
 }

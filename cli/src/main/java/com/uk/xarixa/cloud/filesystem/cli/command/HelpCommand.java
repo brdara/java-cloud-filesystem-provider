@@ -16,9 +16,14 @@ public class HelpCommand implements CliCommand {
 	public String getCommandName() {
 		return "help";
 	}
+	
+	@Override
+	public void printSummaryHelp(PrintWriter out) {
+		out.println("Prints help information");
+	}
 
 	@Override
-	public void printHelp(PrintWriter out) {
+	public void printFullHelp(PrintWriter out) {
 		out.println("Prints help information about a command.");
 	}
 
@@ -27,17 +32,19 @@ public class HelpCommand implements CliCommand {
 		if (commandArguments.length > 1) {
 			for (CliCommand command : commands) {
 				if (command.getCommandName().equals(commandArguments[1])) {
-					command.printHelp(out);
+					command.printFullHelp(out);
 					return true;
 				}
 			}
 		}
 
 		System.out.println("Available commands:");
-		System.out.println("\tdelete - Delete a container, directory or file");
-		System.out.println("\tlist - List files");
-		System.out.println("\tmkdir - Create directory");
-		System.out.println("\tmount - Mount a cloud filesystem");
+		for (CliCommand command : commands) {
+			out.print("\t");
+			out.print(command.getCommandName());
+			out.print("\t-\t");
+			command.printSummaryHelp(out);
+		}
 		System.out.println("To get further help type 'help [COMMAND]'");
 		return true;
 	}

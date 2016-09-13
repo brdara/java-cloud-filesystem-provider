@@ -67,7 +67,7 @@ public class CloudFile extends File implements AclConstants {
 	}
 
 	public CloudFile(CloudPath cloudPath) {
-		super(CloudPath.PATH_SEPARATOR);
+		super(CloudPath.DEFAULT_PATH_SEPARATOR);
 		this.cloudPath = cloudPath;
 	}
 

@@ -1,11 +1,13 @@
 package com.uk.xarixa.cloud.filesystem.cli.command;
 
+import java.util.List;
+
 import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.ParsedCommand;
 
-public abstract class AbstractCliCommand implements CliCommand {
+public abstract class AbstractCliCommand implements CliCommand, Comparable<CliCommand> {
 
 	public final boolean execute(String[] commandArguments) {
-		ParsedCommand parsedCommand = CliCommandHelper.parseCommand(commandArguments, "--");
+		ParsedCommand parsedCommand = CliCommandHelper.parseCommand(getCommandOptions(), commandArguments, "--");
 
 		// Check parameter bounds
 		int numberOfParameters = parsedCommand.getCommandParameters().size();
@@ -21,6 +23,12 @@ public abstract class AbstractCliCommand implements CliCommand {
 		
 		return executeCommand(parsedCommand);
 	}
+
+	/**
+	 * Gets valid options for the command
+	 * @return
+	 */
+	public abstract List<String> getCommandOptions();
 	
 	/**
 	 * The minimum number of parameters (excluding the command itself)
@@ -38,5 +46,10 @@ public abstract class AbstractCliCommand implements CliCommand {
 	 * Implement this method
 	 */
 	public abstract boolean executeCommand(ParsedCommand parsedCommand);
+
+	@Override
+	public int compareTo(CliCommand other) {
+		return getCommandName().compareTo(other.getCommandName());
+	}
 
 }
