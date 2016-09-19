@@ -28,6 +28,7 @@ import com.google.common.hash.HashCode;
 import com.uk.xarixa.cloud.filesystem.cli.Cli;
 import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.ParsedCommand;
 import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper;
+import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper.AcceptAllFilter;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudAclEntry;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudAclFileAttributes;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudFileAttributesView;
@@ -42,13 +43,7 @@ public class ListCommand extends AbstractCliCommand {
 	private static final Logger LOG = LoggerFactory.getLogger(ListCommand.class);
 	private static final String RECURSIVE_OPTION = "recursive";
 	private static final List<String> options = Lists.newArrayList(RECURSIVE_OPTION);
-	public static final Filter<Path> acceptAllFilter =
-											new Filter<Path>() {
-												@Override
-												public boolean accept(Path entry) throws IOException {
-													return true;
-												}
-											};
+	public static final Filter<Path> acceptAllFilter = new AcceptAllFilter();
 
 	public String getCommandName() {
 		return "list";

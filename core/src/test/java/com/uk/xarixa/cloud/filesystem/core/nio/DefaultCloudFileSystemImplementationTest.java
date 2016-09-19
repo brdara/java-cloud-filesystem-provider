@@ -628,6 +628,9 @@ public class DefaultCloudFileSystemImplementationTest {
 			allowing(path).exists();
 			will(returnValue(false));
 			
+			allowing(path).getPathName();
+			will(returnValue("path-with-a-container"));
+			
 			allowing(path).toAbsolutePath();
 			will(returnValue(path));
 

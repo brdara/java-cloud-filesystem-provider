@@ -167,6 +167,18 @@ public class DefaultCloudFileSystemImplementationIntegrationTest extends Abstrac
 	}
 
 	@Test
+	public void testCreateDirectoryCreatesAContainer() throws IOException {
+		String containerName = CONTAINER_NAME + "-2";
+		CloudPath cloudPath = new CloudPath(fileSystem, true, containerName);
+		
+		try {
+			createDirectory(cloudPath);
+		} finally {
+			blobStoreContext.getBlobStore().deleteContainer(containerName);
+		}
+	}
+
+	@Test
 	public void testCreateDirectoryFailsIfTheParentDirectoryDoesNotExist() throws IOException {
 		String pathName = "content/cloud-dir";
 		CloudPath cloudPath = new CloudPath(containerPath, pathName);
@@ -440,31 +452,6 @@ public class DefaultCloudFileSystemImplementationIntegrationTest extends Abstrac
 		// Read attributes back to make sure the file is there
 		CloudBasicFileAttributes targetAttributes = impl.readAttributes(blobStoreContext, CloudBasicFileAttributes.class, dir2);
 		Assert.assertTrue(targetAttributes.isDirectory());
-	}
-
-	@Test
-	public void testLocalFilesystemCopyToANewFile() throws IOException {
-		String originalContent = "This is my content";
-
-		String testFileName = "cloud-file-channel-test.txt";
-		CloudPath testFilePath = new CloudPath(containerPath, testFileName);
-		createRawContent(testFilePath.getPathName(), BlobAccess.PUBLIC_READ, originalContent.getBytes("UTF-8"));
-		assertFileExists(testFilePath);
-
-		String targetFileName = "target-copy.txt";
-		CloudPath targetFilePath = new CloudPath(containerPath, targetFileName);
-		assertNotExists(targetFilePath);
-
-		impl.copyUsingLocalFilesystem(blobStoreContext, testFilePath, targetFilePath,
-				Sets.newHashSet(StandardCopyOption.COPY_ATTRIBUTES));
-
-		// Read attributes back to make sure the file is there
-		CloudBasicFileAttributes targetAttributes = impl.readAttributes(blobStoreContext, CloudBasicFileAttributes.class, targetFilePath);
-		List<String> targetContent = getContentAsLines(targetFileName);
-		Assert.assertEquals(1, targetContent.size());
-		Assert.assertEquals(originalContent, targetContent.get(0));
-		assertFileExists(testFilePath);
-		assertFileExists(targetFilePath);
 	}
 
 	@Test

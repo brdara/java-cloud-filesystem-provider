@@ -36,7 +36,7 @@ public class CloudFileSystemIntegrationTest extends AbstractJCloudsIntegrationTe
 	public void testGetRootDirectoriesWillReturnAllContainers() {
 		List<String> pathNames = new ArrayList<>();
 		impl.getRootDirectories().forEach(d -> pathNames.add(d.toAbsolutePath().toString()));
-		Assert.assertEquals(3, pathNames.size());
+		Assert.assertEquals(4, pathNames.size());
 		Assert.assertTrue("Could not find path name " + CONTAINER_NAME + ": " + pathNames,
 				pathNames.contains(CloudPath.DEFAULT_PATH_SEPARATOR + CONTAINER_NAME));
 		Arrays.stream(containers).forEach(c ->

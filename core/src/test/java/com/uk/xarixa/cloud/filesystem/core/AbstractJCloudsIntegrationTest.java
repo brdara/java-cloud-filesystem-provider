@@ -89,6 +89,9 @@ public abstract class AbstractJCloudsIntegrationTest {
         	
         	allowing(fileSystem).getBlobStoreContext();
         	will(returnValue(blobStoreContext));
+        	
+        	allowing(fileSystem).getSeparator();
+        	will(returnValue(CloudPath.DEFAULT_PATH_SEPARATOR));
         }});
         
 		containerPath = new CloudPath(fileSystem, true, CONTAINER_NAME);

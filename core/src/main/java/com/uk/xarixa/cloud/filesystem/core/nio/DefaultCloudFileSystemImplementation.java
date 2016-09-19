@@ -441,30 +441,32 @@ public class DefaultCloudFileSystemImplementation implements CloudFileSystemImpl
 	 * TODO: Implement access checks
 	 */
 	protected void copyUsingLocalFilesystem(BlobStoreContext context, CloudPath source, Path target, Set<CopyOption> options) throws IOException {
-		CloudBasicFileAttributes sourceAttributes = readAttributes(context, CloudBasicFileAttributes.class, source);
+		FileSystemProviderHelper.copyDirectoryBetweenProviders(source, target,
+				new FileSystemProviderHelper.AcceptAllFilter(), options.contains(CloudCopyOption.RECURSIVE));
 
-		if (sourceAttributes.isDirectory()) {
-			throw new NotImplementedException("Cannot copy directories, not implemented");
-		} else {
-			LOG.info("Copying from local filesystem {} to target location {}...", source.toAbsolutePath(), target.toAbsolutePath());
-			StandardOpenOption createOpt = options.contains(StandardCopyOption.REPLACE_EXISTING) ?
-					StandardOpenOption.CREATE : StandardOpenOption.CREATE_NEW;
-			LOG.debug("Opening a channel to {} with create option {}", target.toAbsolutePath(), createOpt);
-	
-			// Open the file to write
-			try ( SeekableByteChannel targetChannel = Files.newByteChannel(target, EnumSet.of(createOpt, StandardOpenOption.WRITE)) ) {
-				EnumSet<StandardOpenOption> readOptions = EnumSet.of(StandardOpenOption.READ);
-				LOG.debug("Opening a channel to {} with create option {}", target.toAbsolutePath(), createOpt);
-	
-				// Open the file to read
-				try ( CloudFileChannel sourceChannel = newByteChannel(context, source, readOptions) ) {
-					// Transfer
-					sourceChannel.transferTo(0L, sourceChannel.size(), targetChannel);
-				}
-			}
-	
-			LOG.info("Finished copying from local filesystem {} to target location {}", source.toAbsolutePath(), target.toAbsolutePath());
-		}
+//		CloudBasicFileAttributes sourceAttributes = readAttributes(context, CloudBasicFileAttributes.class, source);
+//		if (sourceAttributes.isDirectory()) {
+//
+//		} else {
+//			LOG.info("Copying from local filesystem {} to target location {}...", source.toAbsolutePath(), target.toAbsolutePath());
+//			StandardOpenOption createOpt = options.contains(StandardCopyOption.REPLACE_EXISTING) ?
+//					StandardOpenOption.CREATE : StandardOpenOption.CREATE_NEW;
+//			LOG.debug("Opening a channel to {} with create option {}", target.toAbsolutePath(), createOpt);
+//	
+//			// Open the file to write
+//			try ( SeekableByteChannel targetChannel = Files.newByteChannel(target, EnumSet.of(createOpt, StandardOpenOption.WRITE)) ) {
+//				EnumSet<StandardOpenOption> readOptions = EnumSet.of(StandardOpenOption.READ);
+//				LOG.debug("Opening a channel to {} with create option {}", target.toAbsolutePath(), createOpt);
+//	
+//				// Open the file to read
+//				try ( CloudFileChannel sourceChannel = newByteChannel(context, source, readOptions) ) {
+//					// Transfer
+//					sourceChannel.transferTo(0L, sourceChannel.size(), targetChannel);
+//				}
+//			}
+//	
+//			LOG.info("Finished copying from local filesystem {} to target location {}", source.toAbsolutePath(), target.toAbsolutePath());
+//		}
 	}
 
 	/**

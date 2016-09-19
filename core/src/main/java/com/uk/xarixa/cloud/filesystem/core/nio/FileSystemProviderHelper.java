@@ -39,6 +39,16 @@ public final class FileSystemProviderHelper {
 	private static final Logger LOG = LoggerFactory.getLogger(FileSystemProviderHelper.class);
 	private final static Set<WeakReference<FileSystemProvider>> providers = new HashSet<>();
 	
+	/**
+	 * A {@link Filter} which accepts any path
+	 */
+	public static class AcceptAllFilter implements Filter<Path> {
+		@Override
+		public boolean accept(Path entry) throws IOException {
+			return true;
+		}
+	};
+
 	private FileSystemProviderHelper() {
 		throw new UnsupportedOperationException();
 	}

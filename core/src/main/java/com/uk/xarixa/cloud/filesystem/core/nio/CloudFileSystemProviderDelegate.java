@@ -2,6 +2,8 @@ package com.uk.xarixa.cloud.filesystem.core.nio;
 
 import java.io.IOException;
 import java.net.URI;
+import java.nio.channels.AsynchronousFileChannel;
+import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessMode;
 import java.nio.file.CopyOption;
@@ -23,6 +25,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
@@ -87,6 +90,12 @@ public class CloudFileSystemProviderDelegate extends FileSystemProvider implemen
 
 	@Override
 	public SeekableByteChannel newByteChannel(Path path, Set<? extends OpenOption> options, FileAttribute<?>... attrs)
+			throws IOException {
+		return newFileChannel(path, options, attrs);
+	}
+	
+	@Override
+	public FileChannel newFileChannel(Path path, Set<? extends OpenOption> options, FileAttribute<?>... attrs)
 			throws IOException {
 		CloudPath cloudPath = getCloudPath(path);
 		CloudFileSystemImplementation cloudFileSystemImplementation = getCloudFileSystemImplementation(cloudPath);
