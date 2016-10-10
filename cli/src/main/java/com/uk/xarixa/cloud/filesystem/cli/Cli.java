@@ -24,6 +24,7 @@ import com.uk.xarixa.cloud.filesystem.cli.command.HelpCommand;
 import com.uk.xarixa.cloud.filesystem.cli.command.ListCommand;
 import com.uk.xarixa.cloud.filesystem.cli.command.MkdirCommand;
 import com.uk.xarixa.cloud.filesystem.cli.command.MountCommand;
+import com.uk.xarixa.cloud.filesystem.cli.command.ZipCommand;
 import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper;
 
 /**
@@ -34,7 +35,7 @@ public class Cli {
 	private Terminal terminal;
 	private AtomicBoolean running = new AtomicBoolean(false);
 	private final Set<CliCommand> cliCommands = Sets.newHashSet(new ListCommand(),
-			new CopyCommand(), new DeleteCommand(), new MkdirCommand(), new MountCommand());
+			new CopyCommand(), new DeleteCommand(), new MkdirCommand(), new MountCommand(), new ZipCommand());
 
 	Cli(Terminal terminal) {
         this.terminal = terminal;

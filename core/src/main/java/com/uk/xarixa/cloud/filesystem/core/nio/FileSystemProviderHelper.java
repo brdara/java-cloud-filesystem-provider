@@ -26,6 +26,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,6 +107,7 @@ public final class FileSystemProviderHelper {
 	 * @return true if the action completed otherwise false
 	 */
 	public static boolean ensureDirectoriesExist(Path dir) {
+		LOG.debug("Ensuring directories exist for {}", dir);
     	FileSystemProvider provider = dir.getFileSystem().provider();
 		Path rootContainer = dir.getRoot();
 
@@ -122,19 +124,24 @@ public final class FileSystemProviderHelper {
 		}
 
 		// Ensure container exists
-		Iterator<Path> pathIter = dir.toAbsolutePath().iterator();
+		Iterator<Path> pathIter = dir.iterator();
+		Path currentPath = rootContainer;
+		FileSystem fileSystem = dir.getFileSystem();
 
 		while (pathIter.hasNext()) {
-			Path path = pathIter.next();
+			// Path iterator gives us a part of the path, we have to build it up
+			Path relativePath = pathIter.next();
+			currentPath = fileSystem.getPath(currentPath.toString() +
+					fileSystem.getSeparator() + relativePath.getFileName().toString());
 
-			if (!Files.isDirectory(path)) {
-				LOG.debug("Attempting to create directory '{}'", path);
+			if (!Files.isDirectory(currentPath)) {
+				LOG.debug("Attempting to create directory '{}'", currentPath);
 
 		    	try {
-					provider.createDirectory(path);
-					LOG.debug("Created directory '{}'", path);
+					provider.createDirectory(currentPath);
+					LOG.debug("Created directory '{}'", currentPath);
 				} catch (IOException e) {
-					LOG.error("Could not create directory at '{}'", path, e);
+					LOG.error("Could not create directory at '{}'", currentPath, e);
 					return false;
 				}
 			}
@@ -186,7 +193,9 @@ public final class FileSystemProviderHelper {
 
 					destinationPathString.append(subPath.getResultPath().getFileName());
 					Path copyPath = destinationFileSystem.getPath(destinationPathString.toString());
-					LOG.debug("Created destination path {} (dest root={}, relative={}, name={})", destinationPathString,
+					LOG.debug("Created destination path {} (dest string={}, root={}, relative={}, name={})",
+							copyPath,
+							destinationPathString,
 							newDestinationPathDir,
 							relativeSourcePath.isPresent() ? relativeSourcePath.get() : "N/A",
 							subPath.getResultPath().getFileName());
@@ -317,7 +326,7 @@ public final class FileSystemProviderHelper {
 			Path nextPath = paths.next();
 			DirectoryIterationPaths nextDirIterationPaths =
 					new DirectoryIterationPaths(dirIterationPaths, nextPath);
-			LOG.debug("Iterating through next path {}", nextPath);
+			LOG.debug("Iterating through next path {}", nextDirIterationPaths);
 			
 			// Can throw CancelException to terminate recursion/listing
 			if (!directoryContentAction.apply(nextDirIterationPaths)) {
@@ -354,12 +363,14 @@ public final class FileSystemProviderHelper {
 		public DirectoryIterationPaths(DirectoryIterationPaths sourceDirectoryIterationPaths, Path resultPath) {
 			this(sourceDirectoryIterationPaths.iterationStartPath,
 					sourceDirectoryIterationPaths.resultPath, resultPath);
+			LOG.debug("Created {} from {}, {}", this, sourceDirectoryIterationPaths, resultPath);
 		}
 
 		public DirectoryIterationPaths(Path iterationStartPath, Path sourcePath, Path resultPath) {
 			this.iterationStartPath = iterationStartPath;
 			this.sourcePath = sourcePath;
 			this.resultPath = resultPath;
+			LOG.debug("Created {} from {}, {}, {}", this, iterationStartPath, sourcePath, resultPath);
 		}
 		
 		public Path getIterationStartPath() {
@@ -395,6 +406,11 @@ public final class FileSystemProviderHelper {
 						.subpath(startPathRelativeIndex, sourcePath.getNameCount()).toString();
 			
 			return Optional.of(resultPath.getFileSystem().getPath(startPathName));
+		}
+		
+		@Override
+		public String toString() {
+			return ReflectionToStringBuilder.toString(this);
 		}
 	}
 

@@ -13,13 +13,14 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.uk.xarixa.cloud.filesystem.cli.Cli;
+import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.CommandOption;
 import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.ParsedCommand;
 import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper;
 
 public class MkdirCommand extends AbstractCliCommand {
 	private static final Logger LOG = LoggerFactory.getLogger(MkdirCommand.class);
 	private static final String RECURSIVE_OPTION = "recursive";
-	private static final List<String> options = Lists.newArrayList(RECURSIVE_OPTION);
+	private static final List<CommandOption> options = Lists.newArrayList(new CommandOption(RECURSIVE_OPTION));
 
 	@Override
 	public String getCommandName() {
@@ -46,7 +47,7 @@ public class MkdirCommand extends AbstractCliCommand {
 	}
 	
 	@Override
-	public List<String> getCommandOptions() {
+	public List<CommandOption> getCommandOptions() {
 		return options;
 	}
 
@@ -62,7 +63,7 @@ public class MkdirCommand extends AbstractCliCommand {
 
 	@Override
 	public boolean executeCommand(ParsedCommand parsedCommand) {
-		boolean recursive = parsedCommand.getCommandOptions().contains(RECURSIVE_OPTION);
+		boolean recursive = parsedCommand.getCommandOptionByName(RECURSIVE_OPTION) != null;
 
 		for (String commandArgument : parsedCommand.getCommandParameters()) {
 	    	URI uri;

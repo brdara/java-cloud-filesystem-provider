@@ -2,6 +2,7 @@ package com.uk.xarixa.cloud.filesystem.cli.command;
 
 import java.util.List;
 
+import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.CommandOption;
 import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.ParsedCommand;
 
 public abstract class AbstractCliCommand implements CliCommand, Comparable<CliCommand> {
@@ -28,7 +29,7 @@ public abstract class AbstractCliCommand implements CliCommand, Comparable<CliCo
 	 * Gets valid options for the command
 	 * @return
 	 */
-	public abstract List<String> getCommandOptions();
+	public abstract List<CommandOption> getCommandOptions();
 	
 	/**
 	 * The minimum number of parameters (excluding the command itself)

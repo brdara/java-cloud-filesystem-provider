@@ -9,24 +9,23 @@
 		</layout>
 	</appender>
 
-<!-- 
 	<appender name="file" class="org.apache.log4j.FileAppender">
-		<param name="file" value="testing.log"/>
+		<param name="file" value="cli.log"/>
 		<param name="append" value="false" />
 		<layout class="org.apache.log4j.PatternLayout">
 			<param name="ConversionPattern" value="%d{yyyy-MM-dd, HH:mm:ss} %c{1}:%L %-5p - %m%n" />
 		</layout>
 	</appender>
- -->
 
 	<logger name="com.uk.xarixa.cloud.filesystem" additivity="false">
 		<level value="debug" />
 		<appender-ref ref="out" />
+		<appender-ref ref="file" />
 	</logger>
 
 	<root>
 		<priority value="warn" />
 		<appender-ref ref="out" />
-		<!-- <appender-ref ref="file" />  -->
+		<appender-ref ref="file" />
 	</root>
 </log4j:configuration>
