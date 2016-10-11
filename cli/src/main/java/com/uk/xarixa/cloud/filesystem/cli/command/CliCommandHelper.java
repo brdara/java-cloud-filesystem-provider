@@ -2,7 +2,9 @@ package com.uk.xarixa.cloud.filesystem.cli.command;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -72,7 +74,7 @@ public final class CliCommandHelper {
 	
 
 	public final static class ParsedCommand {
-		private final List<UserCommandOption> commandOptions = new ArrayList<UserCommandOption>(2);
+		private final Map<String,List<UserCommandOption>> commandOptions = new HashMap<>(2);
 		private final List<String> commandParameters = new ArrayList<String>(2);
 
 		ParsedCommand(List<CommandOption> allowedOptions, String[] arguments, String optionPrefix) {
@@ -95,14 +97,14 @@ public final class CliCommandHelper {
 						if (matchingCommandOption != null) {
 							
 							if (matchingCommandOption.hasArgs && splitOption.length == 2) {
-								commandOptions.add(new UserCommandOption(matchingCommandOption, splitOption[1]));
+								addNewCommandOption(new UserCommandOption(matchingCommandOption, splitOption[1]));
 							} else if (matchingCommandOption.hasArgs && matchingCommandOption.mandatoryArgs) {
 								// No arg was passed in
 								LOG.warn("The command option {} has a mandatory argument which was not "
 										+ "supplied, skipping", matchingCommandOption.name);
 							} else {
 								// Presence of the parameter
-								commandOptions.add(new UserCommandOption(matchingCommandOption));
+								addNewCommandOption(new UserCommandOption(matchingCommandOption));
 							}
 							
 						} else {
@@ -130,18 +132,32 @@ public final class CliCommandHelper {
 			return null;
 		}
 
-		public List<UserCommandOption> getUserCommandOptions() {
+		private void addNewCommandOption(UserCommandOption userCommandOption) {
+			List<UserCommandOption> optsList = getCommandOptionsByName(userCommandOption.getName());
+			
+			if (optsList == null) {
+				optsList = new ArrayList<>();
+				commandOptions.put(userCommandOption.getName(), optsList);
+			}
+			
+			optsList.add(userCommandOption);
+		}
+
+		public Map<String,List<UserCommandOption>> getUserCommandOptions() {
 			return commandOptions;
 		}
 
 		public UserCommandOption getCommandOptionByName(String name) {
-			for (UserCommandOption opt : commandOptions) {
-				if (opt.getName().equals(name)) {
-					return opt;
-				}
+			List<UserCommandOption> commandOptionsByName = getCommandOptionsByName(name);
+			if (commandOptionsByName != null && !commandOptionsByName.isEmpty()) {
+				return commandOptionsByName.get(0);
 			}
 			
 			return null;
+		}
+
+		public List<UserCommandOption> getCommandOptionsByName(String name) {
+			return commandOptions.get(name);
 		}
 
 		public List<String> getCommandParameters() {

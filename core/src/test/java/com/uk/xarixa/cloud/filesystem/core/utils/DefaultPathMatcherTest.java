@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 
+import com.uk.xarixa.cloud.filesystem.core.nio.CloudPath;
 import com.uk.xarixa.cloud.filesystem.core.utils.DefaultPathMatcher;
 
 @RunWith(BlockJUnit4ClassRunner.class)
@@ -21,7 +22,7 @@ public class DefaultPathMatcherTest {
 	@Test
 	public void testExtractRegexFromGlobPatternFailsIfAGroupingIsNotFound() {
 		try {
-			DefaultPathMatcher.extractRegexFromGlobPattern("*.{java,class");
+			DefaultPathMatcher.extractRegexFromGlobPattern("*.{java,class", CloudPath.DEFAULT_PATH_SEPARATOR);
 			Assert.fail("Expected an exception to be thrown");
 		} catch (IllegalArgumentException e) {
 			// OK
@@ -31,7 +32,7 @@ public class DefaultPathMatcherTest {
 	@Test
 	public void testExtractRegexFromGlobPatternFailsIfABracketsEndingIsNotFound() {
 		try {
-			DefaultPathMatcher.extractRegexFromGlobPattern("*.[a-z");
+			DefaultPathMatcher.extractRegexFromGlobPattern("*.[a-z", CloudPath.DEFAULT_PATH_SEPARATOR);
 			Assert.fail("Expected an exception to be thrown");
 		} catch (IllegalArgumentException e) {
 			// OK
@@ -40,14 +41,14 @@ public class DefaultPathMatcherTest {
 
 	@Test
 	public void testExtractRegexFromGlobPatternParsesCorrectly() {
-		Assert.assertEquals("[^/]*\\.java", DefaultPathMatcher.extractRegexFromGlobPattern("*.java"));
-		Assert.assertEquals(".*\\.java", DefaultPathMatcher.extractRegexFromGlobPattern("**.java"));
-		Assert.assertEquals(".*/[^/]*\\.java", DefaultPathMatcher.extractRegexFromGlobPattern("**/*.java"));
-		Assert.assertEquals("/home/.*", DefaultPathMatcher.extractRegexFromGlobPattern("/home/**"));
-		Assert.assertEquals("/home/gus/.*", DefaultPathMatcher.extractRegexFromGlobPattern("/home/gus/**"));
-		Assert.assertEquals("/home/gus/[^/]*", DefaultPathMatcher.extractRegexFromGlobPattern("/home/gus/*"));
-		Assert.assertEquals("file\\.[^/][^/][^/]", DefaultPathMatcher.extractRegexFromGlobPattern("file.???"));
-		Assert.assertEquals("special\\@chars\\.\\$\\$\\$", DefaultPathMatcher.extractRegexFromGlobPattern("special\\@chars.$$$"));
+		Assert.assertEquals("[^/]*\\.java", DefaultPathMatcher.extractRegexFromGlobPattern("*.java", CloudPath.DEFAULT_PATH_SEPARATOR));
+		Assert.assertEquals(".*\\.java", DefaultPathMatcher.extractRegexFromGlobPattern("**.java", CloudPath.DEFAULT_PATH_SEPARATOR));
+		Assert.assertEquals(".*/[^/]*\\.java", DefaultPathMatcher.extractRegexFromGlobPattern("**/*.java", CloudPath.DEFAULT_PATH_SEPARATOR));
+		Assert.assertEquals("/home/.*", DefaultPathMatcher.extractRegexFromGlobPattern("/home/**", CloudPath.DEFAULT_PATH_SEPARATOR));
+		Assert.assertEquals("/home/gus/.*", DefaultPathMatcher.extractRegexFromGlobPattern("/home/gus/**", CloudPath.DEFAULT_PATH_SEPARATOR));
+		Assert.assertEquals("/home/gus/[^/]*", DefaultPathMatcher.extractRegexFromGlobPattern("/home/gus/*", CloudPath.DEFAULT_PATH_SEPARATOR));
+		Assert.assertEquals("file\\.[^/][^/][^/]", DefaultPathMatcher.extractRegexFromGlobPattern("file.???", CloudPath.DEFAULT_PATH_SEPARATOR));
+		Assert.assertEquals("special\\@chars\\.\\$\\$\\$", DefaultPathMatcher.extractRegexFromGlobPattern("special\\@chars.$$$", CloudPath.DEFAULT_PATH_SEPARATOR));
 	}
 
 	@Test
@@ -72,6 +73,15 @@ public class DefaultPathMatcherTest {
 		Assert.assertFalse(matcher.matches("DefaultPathMatcherTest.java"));
 		Assert.assertFalse(matcher.matches("/DefaultPathMatcherTest.java"));
 		Assert.assertFalse(matcher.matches("/home/users/DefaultPathMatcherTest.java"));
+		Assert.assertTrue(matcher.matches("/home/users/userdir/DefaultPathMatcherTest.java"));
+	}
+	
+	@Test
+	public void testConstructorCreatesANewPatternMatcherFromAComplexGlobExpressionWithGroupings() {
+		DefaultPathMatcher matcher = new DefaultPathMatcher("glob:**/*.{java,properties,xml}");
+		Assert.assertFalse(matcher.matches("DefaultPathMatcherTest.java"));
+		Assert.assertTrue(matcher.matches("/DefaultPathMatcherTest.java"));
+		Assert.assertTrue(matcher.matches("/home/users/DefaultPathMatcherTest.java"));
 		Assert.assertTrue(matcher.matches("/home/users/userdir/DefaultPathMatcherTest.java"));
 	}
 

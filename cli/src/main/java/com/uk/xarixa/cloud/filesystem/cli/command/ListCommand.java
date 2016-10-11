@@ -29,7 +29,7 @@ import com.uk.xarixa.cloud.filesystem.cli.Cli;
 import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.CommandOption;
 import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.ParsedCommand;
 import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper;
-import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper.AcceptAllFilter;
+import com.uk.xarixa.cloud.filesystem.core.nio.file.PathFilters;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudAclEntry;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudAclFileAttributes;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudFileAttributesView;
@@ -43,8 +43,9 @@ import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudFileAttribute
 public class ListCommand extends AbstractCliCommand {
 	private static final Logger LOG = LoggerFactory.getLogger(ListCommand.class);
 	private static final String RECURSIVE_OPTION = "recursive";
-	private static final List<CommandOption> options = Lists.newArrayList(new CommandOption(RECURSIVE_OPTION));
-	public static final Filter<Path> acceptAllFilter = new AcceptAllFilter();
+	private static final String FILTER_OPTION = "filter";
+	private static final List<CommandOption> options =
+			Lists.newArrayList(new CommandOption(RECURSIVE_OPTION), new CommandOption(FILTER_OPTION, true, true));
 
 	public String getCommandName() {
 		return "list";
@@ -64,6 +65,14 @@ public class ListCommand extends AbstractCliCommand {
 		out.println("\t- List files recursively in all directories and sub-directories on a cloud"
 				+ "filesystem mounted as 's3-host':");
 		out.println("\t\tlist --recursive cloud://s3-host/container/dir");
+		out.println("\t- List files recursively in all directories and sub-directories on a cloud"
+				+ "filesystem mounted as 's3-host' with GLOB-style filtering to show all files "
+				+ "ending with '.java':");
+		out.println("\t\tlist --recursive --filter=glob:**/*.java cloud://s3-host/container/dir");
+		out.println("\t- List files recursively in all directories and sub-directories on a cloud"
+				+ "filesystem mounted as 's3-host' with REGEX-stoyle filtering to show all files "
+				+ "ending with '.java':");
+		out.println("\t\tlist --recursive --filter=glob:.*\\.java cloud://s3-host/container/dir");
 	}
 	
 	@Override
@@ -84,7 +93,7 @@ public class ListCommand extends AbstractCliCommand {
 	@Override
 	public boolean executeCommand(ParsedCommand parsedCommand) {
 		boolean recursive = parsedCommand.getCommandOptionByName(RECURSIVE_OPTION) != null;
-    	int pathsCounter = 0;
+		int pathsCounter = 0;
 		List<String> commandParameters = parsedCommand.getCommandParameters();
 		
 		for (String commandArg : commandParameters) {
@@ -103,40 +112,52 @@ public class ListCommand extends AbstractCliCommand {
 	    	}
 	
     		FileSystemProvider provider = fileSystem.provider();
-	    	if (uri.getPath().equals(fileSystem.getSeparator())) {
-				pathsCounter += listDirectoryContents(provider, fileSystem, null, recursive);
+    		Filter<Path> pathFilters =
+    				createPathFilters(parsedCommand.getCommandOptionsByName(FILTER_OPTION), fileSystem.getSeparator());
+
+    		if (uri.getPath().equals(fileSystem.getSeparator())) {
+				pathsCounter += listDirectoryContents(provider, fileSystem, pathFilters, null, recursive);
 	    	} else {
 				Path path = provider.getPath(uri);
 				
 				if (Files.isRegularFile(path)) {
 					// File listing
-	    			printCloudPathAttributes(fileSystem, path);
+					pathsCounter += printCloudPathAttributes(fileSystem, pathFilters, path);
 	    			pathsCounter++;
 				} else {
-					pathsCounter += listDirectoryContents(provider, fileSystem, path, recursive);
+					pathsCounter += listDirectoryContents(provider, fileSystem, pathFilters, path, recursive);
 				}
 	    	}
-
 		}
 
     	System.out.println(pathsCounter + " total results");
 		return true;
 	}
 	
-	protected int listDirectoryContents(FileSystemProvider provider, FileSystem fileSystem, Path path, boolean recursive) {
+	protected int listDirectoryContents(FileSystemProvider provider, FileSystem fileSystem,
+			Filter<Path> pathFilters, Path path, boolean recursive) {
 		AtomicInteger pathsCounter = new AtomicInteger(0);
 
 		FileSystemProviderHelper.iterateOverDirectoryContents(fileSystem, Optional.ofNullable(path),
-				acceptAllFilter, recursive,
+				PathFilters.ACCEPT_ALL_FILTER, recursive,
 					subPath -> {
-						pathsCounter.addAndGet(printCloudPathAttributes(fileSystem, subPath.getResultPath()));
+						pathsCounter.addAndGet(printCloudPathAttributes(fileSystem, pathFilters, subPath.getResultPath()));
 						return true;
 					});
 
 		return pathsCounter.get();
 	}
 
-	protected int printCloudPathAttributes(FileSystem fileSystem, Path path) {
+	protected int printCloudPathAttributes(FileSystem fileSystem, Filter<Path> pathFilters, Path path) {
+		// Accepted by the filter?
+		try {
+			if (pathFilters != null && !pathFilters.accept(path)) {
+				return 0;
+			}
+		} catch (IOException e) {
+			LOG.warn("Path filter threw an exception for path '{}'", path, e);
+		}
+
 		CloudFileAttributesView fileAttributeView =
 				fileSystem.provider().getFileAttributeView(path, CloudFileAttributesView.class);
 

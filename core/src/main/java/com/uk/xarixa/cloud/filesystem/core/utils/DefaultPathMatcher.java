@@ -6,13 +6,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.uk.xarixa.cloud.filesystem.core.nio.CloudPath;
 
 /**
- * A {@link PathMatcher} capable of regex and glob style matches
+ * A {@link PathMatcher} capable of regex and glob style matches.
  */
 public class DefaultPathMatcher implements PathMatcher {
+	private final static Logger LOG = LoggerFactory.getLogger(DefaultPathMatcher.class);
 	private final ThreadLocal<Matcher> patternMatcher;
 	
 	static ThreadLocal<Matcher> createLocalMatcher(String regex) {
@@ -25,7 +28,7 @@ public class DefaultPathMatcher implements PathMatcher {
 		};
 	}
 	
-	static String extractRegexFromGlobPattern(String globPattern) {
+	static String extractRegexFromGlobPattern(String globPattern, String pathSeparator) {
 		StringBuilder regex = new StringBuilder();
 		
 		for (int i=0; i<globPattern.length(); i++) {
@@ -40,11 +43,11 @@ public class DefaultPathMatcher implements PathMatcher {
 					i = nextCharIndex;
 				} else {
 					// Glob: *
-					regex.append("[^" + CloudPath.DEFAULT_PATH_SEPARATOR_CHAR + "]*");
+					regex.append("[^" + pathSeparator + "]*");
 				}
 			} else if (character == '?') {
 				// Glob: ?
-				regex.append("[^" + CloudPath.DEFAULT_PATH_SEPARATOR_CHAR + "]");
+				regex.append("[^" + pathSeparator + "]");
 			} else if (character == '[') {
 				// Glob: [ABCa-z]
 				// Extract the rest of the expression
@@ -72,8 +75,9 @@ public class DefaultPathMatcher implements PathMatcher {
 					throw new IllegalArgumentException("Error at character " + i +
 							", group started with no end of grouping character '}' (i.e. {java,class}) in glob expression: " + globPattern);
 				}
-				String expression = StringUtils.replaceOnce(regex.substring(i + 1, endExpression - 1), ",", "|");
+				String expression = StringUtils.replace(globPattern.substring(i + 1, endExpression), ",", "|");
 				regex.append("(").append(expression).append(")");
+				i = endExpression;
 			} else {
 				// Escape and append the character
 				if (StringUtils.contains("$+|^.", character)) {
@@ -87,13 +91,27 @@ public class DefaultPathMatcher implements PathMatcher {
 		return regex.toString();
 	}
 
+	/**
+	 * Constructs a default path matcher with the {@link CloudPath#DEFAULT_PATH_SEPARATOR default path separator}
+	 * @param syntaxAndPattern
+	 */
 	public DefaultPathMatcher(String syntaxAndPattern) {
+		this(syntaxAndPattern, CloudPath.DEFAULT_PATH_SEPARATOR);
+	}
+
+	/**
+	 * Constructs a default path matcher with a given file system path separator
+	 * @param syntaxAndPattern
+	 * @param fileSystemPathSeparator	Path separator for this filesystem
+	 */
+	public DefaultPathMatcher(String syntaxAndPattern, String fileSystemPathSeparator) {
 		String syntax = StringUtils.substringBefore(syntaxAndPattern, ":");
 		String pattern = StringUtils.substringAfter(syntaxAndPattern, ":");
 		String regex;
 
 		if (StringUtils.equals(syntax, "glob")) {
-			regex = extractRegexFromGlobPattern(pattern);
+			regex = extractRegexFromGlobPattern(pattern, fileSystemPathSeparator);
+			LOG.debug("Created regex pattern '{}' from GLOB '{}'", regex, pattern);
 		} else if (StringUtils.equals(syntax, "regex")) {
 			regex = pattern;
 		} else {

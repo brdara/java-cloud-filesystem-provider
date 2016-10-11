@@ -2,7 +2,6 @@ package com.uk.xarixa.cloud.filesystem.core.nio;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.channels.SeekableByteChannel;
 import java.nio.file.CopyOption;
 import java.nio.file.DirectoryNotEmptyException;
 import java.nio.file.DirectoryStream.Filter;
@@ -25,7 +24,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.jclouds.apis.ApiMetadata;
 import org.jclouds.blobstore.BlobStore;
@@ -43,6 +41,7 @@ import com.uk.xarixa.cloud.filesystem.core.host.configuration.CloudHostConfigura
 import com.uk.xarixa.cloud.filesystem.core.nio.channels.CloudFileChannel;
 import com.uk.xarixa.cloud.filesystem.core.nio.channels.CloudFileChannelTransport;
 import com.uk.xarixa.cloud.filesystem.core.nio.channels.DefaultCloudFileChannelTransport;
+import com.uk.xarixa.cloud.filesystem.core.nio.file.CloudDirectoryStream;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudAclEntry;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudAclEntrySet;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudAclFileAttributes;

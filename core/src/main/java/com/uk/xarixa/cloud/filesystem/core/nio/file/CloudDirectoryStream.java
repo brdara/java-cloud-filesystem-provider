@@ -1,4 +1,4 @@
-package com.uk.xarixa.cloud.filesystem.core.nio;
+package com.uk.xarixa.cloud.filesystem.core.nio.file;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
@@ -13,6 +13,8 @@ import org.jclouds.blobstore.domain.PageSet;
 import org.jclouds.blobstore.domain.StorageMetadata;
 import org.jclouds.blobstore.options.ListContainerOptions;
 
+import com.uk.xarixa.cloud.filesystem.core.nio.CloudPath;
+import com.uk.xarixa.cloud.filesystem.core.nio.CloudPathWithAttributes;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudBasicFileAttributes;
 
 public class CloudDirectoryStream implements DirectoryStream<CloudPath> {
@@ -41,7 +43,7 @@ public class CloudDirectoryStream implements DirectoryStream<CloudPath> {
 	 * @param isRecursive	Whether this is a recursive listing. If false
 	 * @param filter
 	 */
-	CloudDirectoryStream(CloudPath dirPath, boolean isContainer, boolean isRecursive, DirectoryStream.Filter<CloudPath> filter) {
+	public CloudDirectoryStream(CloudPath dirPath, boolean isContainer, boolean isRecursive, DirectoryStream.Filter<CloudPath> filter) {
 		this.dirPath = dirPath;
 		this.isContainer = isContainer;
 		this.isRecursive = isRecursive;

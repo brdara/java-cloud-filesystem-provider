@@ -21,6 +21,7 @@ import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.ParsedCommand
 import com.uk.xarixa.cloud.filesystem.core.nio.CloudFileSystemProvider;
 import com.uk.xarixa.cloud.filesystem.core.nio.CloudPathException;
 import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper;
+import com.uk.xarixa.cloud.filesystem.core.nio.file.PathFilters;
 import com.uk.xarixa.cloud.filesystem.core.nio.options.CloudCopyOption;
 
 public class CopyCommand extends AbstractCliCommand {
@@ -124,7 +125,7 @@ public class CopyCommand extends AbstractCliCommand {
 	    		// to another destintation provider implementation like our cloud one, da-da-dumb
 	    		if (Files.isDirectory(sourcePath)) {
 	    			filesCopied = FileSystemProviderHelper.copyDirectoryBetweenProviders(sourcePath,
-	    					destinationPath, ListCommand.acceptAllFilter, recursive);
+	    					destinationPath, PathFilters.ACCEPT_ALL_FILTER, recursive);
 	    		} else {
 	    			filesCopied = FileSystemProviderHelper.copyFileBetweenProviders(sourcePath, destinationPath);
 	    		}

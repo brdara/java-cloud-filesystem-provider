@@ -36,6 +36,7 @@ import com.google.common.collect.Sets;
 import com.uk.xarixa.cloud.filesystem.core.host.configuration.CloudHostConfiguration;
 import com.uk.xarixa.cloud.filesystem.core.host.factory.CloudHostProvider;
 import com.uk.xarixa.cloud.filesystem.core.host.factory.JCloudsCloudHostProvider;
+import com.uk.xarixa.cloud.filesystem.core.nio.file.CloudDirectoryStream;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudBasicFileAttributes;
 import com.uk.xarixa.cloud.filesystem.core.nio.options.CloudCopyOption;
 import com.uk.xarixa.cloud.filesystem.core.nio.options.DeleteOption;

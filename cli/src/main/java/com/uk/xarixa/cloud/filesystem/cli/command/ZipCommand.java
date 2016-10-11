@@ -9,6 +9,7 @@ import java.net.URISyntaxException;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.spi.FileSystemProvider;
 import java.util.List;
 import java.util.Optional;
@@ -27,11 +28,14 @@ import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.ParsedCommand
 import com.uk.xarixa.cloud.filesystem.core.nio.CloudPathException;
 import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper;
 import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper.DirectoryIterationPaths;
+import com.uk.xarixa.cloud.filesystem.core.nio.file.PathFilters;
 
 public class ZipCommand extends AbstractCliCommand {
 	private static final Logger LOG = LoggerFactory.getLogger(ZipCommand.class);
 	private static final String RECURSIVE_OPTION = "recursive";
-	private static final List<CommandOption> options = Lists.newArrayList(new CommandOption(RECURSIVE_OPTION));
+	private static final String FILTER_OPTION = "filter";
+	private static final List<CommandOption> options =
+			Lists.newArrayList(new CommandOption(RECURSIVE_OPTION), new CommandOption(FILTER_OPTION, true, true));
 
 	@Override
 	public String getCommandName() {
@@ -52,6 +56,12 @@ public class ZipCommand extends AbstractCliCommand {
 		out.println("\t\tzip --recursive file:///dir1/dir2 cloud://s3-host/container1/dir1/myzip.zip");
 		out.println("\t- Create a zip from the local filesystem 'dir2' and 'dir3' all of it's contents:");
 		out.println("\t\tzip --recursive file:///dir1/dir2 file:///dir1/dir3 cloud://s3-host/container1/dir1/myzip.zip");
+		out.println("\t- Create a zip from the local filesystem 'dir2' and 'dir3' "
+				+ "with GLOB-style filtering to add only files ending with '.java':");
+		out.println("\t\tzip --recursive --filter=glob:**/*.java file:///dir1/dir3 cloud://s3-host/container1/dir1/myzip.zip");
+		out.println("\t- Create a zip from the local filesystem 'dir2' and 'dir3' "
+				+ "with REGEX-style filtering to add only files ending with '.java':");
+		out.println("\t\tzip --recursive --filter=regex:.*\\.java file:///dir1/dir3 cloud://s3-host/container1/dir1/myzip.zip");
 	}
 
 	@Override
@@ -126,12 +136,20 @@ public class ZipCommand extends AbstractCliCommand {
 		    	}
 	
 				final String sourceFsSeparator = sourcePath.getFileSystem().getSeparator();
-	
+				Filter<Path> pathFilters =
+						createPathFilters(parsedCommand.getCommandOptionsByName(FILTER_OPTION), sourceFsSeparator);
+
 				try {
 		    		FileSystemProviderHelper.iterateOverDirectoryContents(
-		    				sourcePath.getFileSystem(), Optional.ofNullable(sourcePath), ListCommand.acceptAllFilter,
+		    				sourcePath.getFileSystem(), Optional.ofNullable(sourcePath), PathFilters.ACCEPT_ALL_FILTER,
 		    					recursive, subPath -> {
-		    						return copyToZip(zipOut, sourceFsSeparator, destinationFsSeparator, subPath);
+		    						try {
+										return copyToZip(zipOut, sourceFsSeparator, destinationFsSeparator,
+												pathFilters, subPath);
+									} catch (Exception e) {
+										LOG.warn("I/O exception copying '{}' to ZIP", subPath, e);
+										return false;
+									}
 		    					});
 		    	} catch (Exception e) {
 					System.err.println("Could not create directory '" + sourceUri.toString() + "': " + e.getMessage());
@@ -147,9 +165,10 @@ public class ZipCommand extends AbstractCliCommand {
 	}
 
 	protected Boolean copyToZip(ZipOutputStream zipOut, final String sourceFsSeparator,
-			final String destinationFsSeparator, DirectoryIterationPaths subPath) {
-		// Only copy directories
-		if (!Files.isDirectory(subPath.getResultPath())) {
+			final String destinationFsSeparator, Filter<Path> pathFilters,
+			DirectoryIterationPaths subPath) throws IOException {
+		// Only copy files and not directories
+		if (!Files.isDirectory(subPath.getResultPath()) && pathFilters.accept(subPath.getResultPath())) {
 			// Create a path to the zip file
 			Optional<Path> relativeSourcePath = subPath.getRelativeSourcePath();
 			StringBuilder destinationPathString = new StringBuilder();
@@ -194,6 +213,10 @@ public class ZipCommand extends AbstractCliCommand {
 			} finally {
 				IOUtils.closeQuietly(sourceInputStream);
 			}
+		} else {
+			LOG.debug("Skipping {} (is file={}, matches filters={})",
+					subPath.getResultPath(), !Files.isDirectory(subPath.getResultPath()),
+					pathFilters.accept(subPath.getResultPath()));
 		}
 
 		return true;

@@ -19,7 +19,7 @@
 
 	<logger name="com.uk.xarixa.cloud.filesystem" additivity="false">
 		<level value="debug" />
-		<appender-ref ref="out" />
+		<!-- <appender-ref ref="out" />  -->
 		<appender-ref ref="file" />
 	</logger>
 

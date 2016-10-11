@@ -19,6 +19,7 @@ import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.ParsedCommand
 import com.uk.xarixa.cloud.filesystem.core.nio.CloudFileSystemProvider;
 import com.uk.xarixa.cloud.filesystem.core.nio.CloudPath;
 import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper;
+import com.uk.xarixa.cloud.filesystem.core.nio.file.PathFilters;
 import com.uk.xarixa.cloud.filesystem.core.nio.options.DeleteOption;
 
 /**
@@ -92,7 +93,7 @@ public class DeleteCommand extends AbstractCliCommand {
 	    		// For a directory work out if sub-dirs and files exist
 	    		if (!recursive &&
 	    				!FileSystemProviderHelper.iterateOverDirectoryContents(fileSystem, Optional.ofNullable(path),
-							ListCommand.acceptAllFilter, recursive,
+	    						PathFilters.ACCEPT_ALL_FILTER, recursive,
 								subPath -> {
 									// Any content in the directory without the recursive option should throw an error
 									return false;
@@ -133,7 +134,7 @@ public class DeleteCommand extends AbstractCliCommand {
 			// Iterate across the directories, deleting all content
 			List<Path> directories = new ArrayList<>();
 			if (!FileSystemProviderHelper.iterateOverDirectoryContents(dirPath.getFileSystem(), Optional.ofNullable(dirPath),
-				ListCommand.acceptAllFilter, recursive,
+				PathFilters.ACCEPT_ALL_FILTER, recursive,
 					subPath -> {
 						// Save directories for later after recursion has completed
 						if (Files.isDirectory(subPath.getResultPath())) {
