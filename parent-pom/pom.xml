@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.uk.xarixa.cloud</groupId>
 		<artifactId>java-cloud-filesystem-provider</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.4</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<artifactId>parent-pom</artifactId>

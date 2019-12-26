@@ -4,7 +4,7 @@
 	<groupId>com.uk.xarixa.cloud</groupId>
 	<artifactId>java-cloud-filesystem-provider</artifactId>
 	<description>A Java filesystem provider for Java SE 8+: http://docs.oracle.com/javase/7/docs/technotes/guides/io/fsp/filesystemprovider.html</description>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.4</version>
 	<packaging>pom</packaging>
 
 	<licenses>
