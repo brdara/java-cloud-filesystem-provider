@@ -12,14 +12,15 @@ import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.spi.FileSystemProvider;
 import java.security.Principal;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.commons.lang3.StringUtils;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -247,8 +248,8 @@ public class ListCommand extends AbstractCliCommand {
 			System.err.println("Could not read file attributes for '" + path.toString() + "'");
 			return 0;
 		}
-		
-		DateTimeFormatter dtFormat = ISODateTimeFormat.dateHourMinuteSecondMillis();
+
+		DateTimeFormatter dtFormat = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
 		StringBuilder listing = new StringBuilder();
 		listing.append(path.toAbsolutePath().toString());
 		if (attributes.isDirectory()) {
@@ -262,14 +263,18 @@ public class ListCommand extends AbstractCliCommand {
 
 		listing.append(" ");
 		if (attributes.creationTime() != null) {
-			listing.append(dtFormat.print(attributes.creationTime().toMillis()));
+			listing.append(dtFormat.format(
+				Instant.ofEpochMilli(attributes.creationTime().toMillis())
+					.atZone(ZoneId.systemDefault()).toOffsetDateTime()));
 		} else {
 			listing.append("-");
 		}
 
 		listing.append(" ");
 		if (attributes.lastModifiedTime() != null) {
-			listing.append(dtFormat.print(attributes.lastModifiedTime().toMillis()));
+			listing.append(dtFormat.format(
+					Instant.ofEpochMilli(attributes.lastModifiedTime().toMillis())
+					.atZone(ZoneId.systemDefault()).toOffsetDateTime()));
 		} else {
 			listing.append("-");
 		}

@@ -25,7 +25,7 @@
 		<maven-release-plugin-version>2.5.3</maven-release-plugin-version>
 		<maven-dependency-plugin-version>2.10</maven-dependency-plugin-version>
 		<build-helper.plugin.version>1.10</build-helper.plugin.version>
-		<jacoco-plugin-version>0.7.6.201602180812</jacoco-plugin-version>
+		<jacoco-plugin-version>0.8.5</jacoco-plugin-version>
 		<skipIntegrationTests>true</skipIntegrationTests>
 	</properties>
 

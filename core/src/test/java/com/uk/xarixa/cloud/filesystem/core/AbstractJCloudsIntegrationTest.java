@@ -17,7 +17,7 @@ import org.jclouds.blobstore.domain.StorageMetadata;
 import org.jclouds.blobstore.domain.StorageType;
 import org.jclouds.blobstore.options.ListContainerOptions;
 import org.jclouds.domain.Location;
-import org.jclouds.openstack.swift.SwiftApiMetadata;
+import org.jclouds.openstack.swift.v1.SwiftApiMetadata;
 import org.jmock.Expectations;
 import org.jmock.integration.junit4.JUnitRuleMockery;
 import org.jmock.lib.legacy.ClassImposteriser;
