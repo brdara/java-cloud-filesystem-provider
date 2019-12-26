@@ -16,7 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import com.uk.xarixa.cloud.filesystem.core.host.CloudHostConfigurationType;
 
-import io.github.lukehutch.fastclasspathscanner.FastClasspathScanner;
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.ClassInfo;
 
 /**
  * A builder for {@link CloudHostConfiguration} types
@@ -33,11 +34,14 @@ public class CloudHostConfigurationBuilder {
 	 */
 	public static List<String> getAllCloudHostSettingTypes() {
 		List<String> settingNames = new ArrayList<>();
-		List<String> cloudHostSettingsClassNames =
-				new FastClasspathScanner().scan().getNamesOfClassesWithAnnotation(CloudHostConfigurationType.class);
+		List<ClassInfo> cloudHostSettingsClasses =
+				new ClassGraph().enableClassInfo().enableAnnotationInfo()
+					.scan().getClassesWithAnnotation(CloudHostConfigurationType.class.getName());
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-		for (String cloudHostSettingsClassName : cloudHostSettingsClassNames) {
+		for (ClassInfo cloudHostSettingsClassInfo : cloudHostSettingsClasses) {
+			String cloudHostSettingsClassName = cloudHostSettingsClassInfo.getName();
+
 			try {
 				Class<? extends CloudHostConfiguration> cloudHostSettingsClass =
 						(Class<? extends CloudHostConfiguration>)classLoader.loadClass(cloudHostSettingsClassName);
@@ -46,9 +50,9 @@ public class CloudHostConfigurationBuilder {
 					settingNames.add(name);
 				}
 			} catch (ClassNotFoundException e) {
-				LOG.warn("Could not load settings class " + cloudHostSettingsClassName + " in the classpath", e);
+				LOG.warn("Could not load settings class {} in the classpath", cloudHostSettingsClassName, e);
 			} catch (IllegalArgumentException e) {
-				LOG.warn("Settings class " + cloudHostSettingsClassName + " is not valid", e);
+				LOG.warn("Settings class {} is not valid", cloudHostSettingsClassName, e);
 			}
 		}
 
@@ -61,22 +65,25 @@ public class CloudHostConfigurationBuilder {
 	 * @return
 	 */
 	public static Class<? extends CloudHostConfiguration> getCloudHostConfigurationClass(String cloudHostConfigurationType) {
-		List<String> cloudHostConfClassNames =
-				new FastClasspathScanner().scan().getNamesOfClassesWithAnnotation(CloudHostConfigurationType.class);
+		List<ClassInfo> cloudHostSettingsClasses =
+				new ClassGraph().enableClassInfo().enableAnnotationInfo()
+					.scan().getClassesWithAnnotation(CloudHostConfigurationType.class.getName());
 		ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
 
-		for (String cloudHostConfClassName : cloudHostConfClassNames) {
+		for (ClassInfo cloudHostSettingsClassInfo : cloudHostSettingsClasses) {
+			String cloudHostSettingsClassName = cloudHostSettingsClassInfo.getName();
+
 			try {
 				Class<? extends CloudHostConfiguration> cloudHostConfClass =
-						(Class<? extends CloudHostConfiguration>)classLoader.loadClass(cloudHostConfClassName);
+						(Class<? extends CloudHostConfiguration>)classLoader.loadClass(cloudHostSettingsClassName);
 				String foundName = getCloudHostConfigurationNameFromCloudHostConfigurationClassAnnotation(cloudHostConfClass);
 				if (StringUtils.equals(cloudHostConfigurationType, foundName)) {
 					return cloudHostConfClass;
 				}
 			} catch (ClassNotFoundException e) {
-				LOG.warn("Could not load cloud host configuration class " + cloudHostConfClassName + " in the classpath", e);
+				LOG.warn("Could not load cloud host configuration class {} in the classpath", cloudHostSettingsClassName, e);
 			} catch (IllegalArgumentException e) {
-				LOG.warn("Cloud host configuration class " + cloudHostConfClassName + " is not valid", e);
+				LOG.warn("Cloud host configuration class {} is not valid", cloudHostSettingsClassName, e);
 			}
 		}
 		

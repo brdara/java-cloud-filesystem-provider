@@ -21,7 +21,6 @@ import org.junit.runners.BlockJUnit4ClassRunner;
 
 import com.google.common.collect.Sets;
 import com.uk.xarixa.cloud.filesystem.core.host.configuration.CloudHostConfiguration;
-import com.uk.xarixa.cloud.filesystem.core.io.CloudFile;
 import com.uk.xarixa.cloud.filesystem.core.nio.CloudFileSystem;
 import com.uk.xarixa.cloud.filesystem.core.nio.CloudPath;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.AclConstants;

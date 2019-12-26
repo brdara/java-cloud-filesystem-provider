@@ -32,7 +32,7 @@ import org.jclouds.blobstore.options.CopyOptions;
 import org.jclouds.domain.Location;
 import org.jclouds.io.ContentMetadata;
 import org.jclouds.io.ContentMetadataBuilder;
-import org.jclouds.openstack.swift.SwiftApiMetadata;
+import org.jclouds.openstack.swift.v1.SwiftApiMetadata;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
