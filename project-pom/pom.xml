@@ -23,10 +23,10 @@
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>
-					<compilerVersion>1.8</compilerVersion>
+					<compilerVersion>${java.version}</compilerVersion>
 					<fork>true</fork>
-					<source>1.8</source>
-					<target>1.8</target>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
 					<debug>true</debug>
 					<meminitial>256m</meminitial>
 					<maxmem>1024m</maxmem>
@@ -162,6 +162,13 @@
 				<version>2.6</version>
 			</dependency>
 
+			<!-- Java 9+ build dependency -->
+			<dependency>
+				<groupId>javax.xml.bind</groupId>
+				<artifactId>jaxb-api</artifactId>
+				<version>2.3.1</version>
+				<scope>runtime</scope>
+			</dependency>
 		</dependencies>
 	</dependencyManagement>
 
@@ -175,6 +182,10 @@
 					<groupId>org.hamcrest</groupId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
 		</dependency>
 	</dependencies>
 
