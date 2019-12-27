@@ -10,9 +10,8 @@
 		<relativePath>../project-pom/pom.xml</relativePath>
 	</parent>
 
-	<groupId>com.uk.xarixa.cloud</groupId>
 	<artifactId>backup-gui</artifactId>
-	<version>0.5.0-SNAPSHOT</version>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.openjfx</groupId>

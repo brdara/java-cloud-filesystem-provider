@@ -30,5 +30,6 @@
 		<module>core</module>
 		<module>cli</module>
 		<module>backup-gui</module>
+		<module>backup</module>
 	</modules>
 </project>

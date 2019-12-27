@@ -116,7 +116,7 @@ public class CloudDirectoryStream implements DirectoryStream<CloudPath> {
 					StringUtils.substringAfter(meta.getName(), dirPathName);
 
 				// The listing returns the directory name as part of the listing, don't return this
-				if (StringUtils.isNotBlank(filename)) {
+				if (StringUtils.isNotBlank(filename) && !StringUtils.equals(filename, CloudPath.DEFAULT_PATH_SEPARATOR)) {
 					CloudBasicFileAttributes cloudFileAttributes = new CloudBasicFileAttributes(meta);
 					CloudPath path =
 							new CloudPathWithAttributes(dirPath.getFileSystem(), false, dirPath, filename, cloudFileAttributes);
