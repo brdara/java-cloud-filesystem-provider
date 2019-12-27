@@ -16,8 +16,8 @@ import org.jclouds.blobstore.BlobStore;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jclouds.blobstore.domain.BlobAccess;
 import org.jmock.Expectations;
+import org.jmock.imposters.ByteBuddyClassImposteriser;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -39,7 +39,7 @@ public class CloudFileAttributesViewTest {
 	private static final String TEST_CONTAINER = "test-container";
 	@Rule
 	public JUnitRuleMockery context = new JUnitRuleMockery() {{
-		setImposteriser(ClassImposteriser.INSTANCE);
+		setImposteriser(ByteBuddyClassImposteriser.INSTANCE);
 	}};
 	private BlobStoreContext blobStoreContext;
 	private CloudPath cloudPath;

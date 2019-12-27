@@ -2,7 +2,6 @@ package com.uk.xarixa.cloud.filesystem.core.nio;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.StandardWatchEventKinds;
@@ -12,8 +11,8 @@ import java.nio.file.WatchService;
 import java.util.Iterator;
 
 import org.jmock.Expectations;
+import org.jmock.imposters.ByteBuddyClassImposteriser;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -26,7 +25,7 @@ import com.uk.xarixa.cloud.filesystem.core.nio.file.CloudWatchService;
 public class CloudPathTest {
 	@Rule
 	public JUnitRuleMockery context = new JUnitRuleMockery() {{
-		setImposteriser(ClassImposteriser.INSTANCE);
+		setImposteriser(ByteBuddyClassImposteriser.INSTANCE);
 	}};
 	
 	@Test

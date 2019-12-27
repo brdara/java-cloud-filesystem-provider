@@ -1,8 +1,8 @@
 package com.uk.xarixa.cloud.filesystem.core.nio;
 
 import org.jmock.Expectations;
+import org.jmock.imposters.ByteBuddyClassImposteriser;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,7 +15,7 @@ import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper.Director
 public class FileSystemProviderHelperTest {
 	@Rule
 	public JUnitRuleMockery context = new JUnitRuleMockery() {{
-		setImposteriser(ClassImposteriser.INSTANCE);
+		setImposteriser(ByteBuddyClassImposteriser.INSTANCE);
 	}};
 	
 	@Test

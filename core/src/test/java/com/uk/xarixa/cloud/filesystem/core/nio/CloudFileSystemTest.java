@@ -9,8 +9,8 @@ import java.util.Collection;
 import org.jclouds.blobstore.BlobStoreContext;
 import org.jmock.Expectations;
 import org.jmock.Sequence;
+import org.jmock.imposters.ByteBuddyClassImposteriser;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,7 +31,7 @@ public class CloudFileSystemTest {
 
 	@Rule
 	public JUnitRuleMockery context = new JUnitRuleMockery() {{
-		setImposteriser(ClassImposteriser.INSTANCE);
+		setImposteriser(ByteBuddyClassImposteriser.INSTANCE);
 	}};
 
 	@Before

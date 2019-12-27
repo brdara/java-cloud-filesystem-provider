@@ -1,7 +1,7 @@
 package com.uk.xarixa.cloud.filesystem.core.utils;
 
+import org.jmock.imposters.ByteBuddyClassImposteriser;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -9,14 +9,13 @@ import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 
 import com.uk.xarixa.cloud.filesystem.core.nio.CloudPath;
-import com.uk.xarixa.cloud.filesystem.core.utils.DefaultPathMatcher;
 
 @RunWith(BlockJUnit4ClassRunner.class)
 public class DefaultPathMatcherTest {
 
 	@Rule
 	public JUnitRuleMockery context = new JUnitRuleMockery() {{
-		setImposteriser(ClassImposteriser.INSTANCE);
+		setImposteriser(ByteBuddyClassImposteriser.INSTANCE);
 	}};
 
 	@Test

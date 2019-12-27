@@ -7,8 +7,8 @@ import org.jclouds.blobstore.options.GetOptions;
 import org.jclouds.blobstore.options.PutOptions;
 import org.jclouds.blobstore.options.PutOptions.ImmutablePutOptions;
 import org.jclouds.s3.domain.AccessControlList;
+import org.jmock.imposters.ByteBuddyClassImposteriser;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -16,17 +16,12 @@ import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 
 import com.google.common.net.MediaType;
-import com.uk.xarixa.cloud.filesystem.core.file.attribute.CloudPermissionFileAttribute;
-import com.uk.xarixa.cloud.filesystem.core.file.attribute.ContentTypeFileAttribute;
-import com.uk.xarixa.cloud.filesystem.core.file.attribute.FileAttributeLookupMap;
-import com.uk.xarixa.cloud.filesystem.core.file.attribute.GetOptionFileAttribute;
-import com.uk.xarixa.cloud.filesystem.core.file.attribute.PutOptionFileAttribute;
 
 @RunWith(BlockJUnit4ClassRunner.class)
 public class FileAttributeLookupMapTest {
 	@Rule
 	public JUnitRuleMockery context = new JUnitRuleMockery() {{
-		setImposteriser(ClassImposteriser.INSTANCE);
+		setImposteriser(ByteBuddyClassImposteriser.INSTANCE);
 	}};
 
 	@Test

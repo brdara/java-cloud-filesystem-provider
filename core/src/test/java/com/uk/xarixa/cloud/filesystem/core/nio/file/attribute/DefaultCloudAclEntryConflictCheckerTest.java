@@ -15,8 +15,8 @@ import java.util.Set;
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
 import org.jclouds.blobstore.domain.BlobAccess;
 import org.jmock.Expectations;
+import org.jmock.imposters.ByteBuddyClassImposteriser;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -24,19 +24,13 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 
-import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudAclEntry;
-import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudAclEntryBuilder;
-import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudAclEntrySet;
-import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.ConflictingCloudAclEntry;
-import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.DefaultCloudAclEntryConflictChecker;
-import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.PublicPrivateCloudPermissionsPrincipal;
 import com.uk.xarixa.cloud.filesystem.core.security.AnonymousUserPrincipal;
 
 @RunWith(BlockJUnit4ClassRunner.class)
 public class DefaultCloudAclEntryConflictCheckerTest {
 	@Rule
 	public JUnitRuleMockery context = new JUnitRuleMockery() {{
-		setImposteriser(ClassImposteriser.INSTANCE);
+		setImposteriser(ByteBuddyClassImposteriser.INSTANCE);
 	}};
 
 	private DefaultCloudAclEntryConflictChecker checker;

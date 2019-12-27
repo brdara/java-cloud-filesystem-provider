@@ -7,8 +7,8 @@ import java.nio.file.attribute.UserPrincipal;
 import java.util.EnumSet;
 import java.util.Set;
 
+import org.jmock.imposters.ByteBuddyClassImposteriser;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
@@ -22,16 +22,12 @@ import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudAclEntryBuild
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudAclEntrySet;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.TestGroupImpl;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.TestUserImpl;
-import com.uk.xarixa.cloud.filesystem.core.security.AnonymousGroupPrincipal;
-import com.uk.xarixa.cloud.filesystem.core.security.AnonymousUserPrincipal;
-import com.uk.xarixa.cloud.filesystem.core.security.DefaultAclCheckingSecurityManager;
-import com.uk.xarixa.cloud.filesystem.core.security.UserGroupLookupService;
 
 @RunWith(BlockJUnit4ClassRunner.class)
 public class DefaultAclCheckingSecurityManagerTest {
 	@Rule
 	public JUnitRuleMockery context = new JUnitRuleMockery() {{
-		setImposteriser(ClassImposteriser.INSTANCE);
+		setImposteriser(ByteBuddyClassImposteriser.INSTANCE);
 	}};
 
 	private DefaultAclCheckingSecurityManager mgr;

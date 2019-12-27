@@ -9,8 +9,8 @@ import java.util.Set;
 
 import org.jclouds.blobstore.domain.BlobAccess;
 import org.jmock.Expectations;
+import org.jmock.imposters.ByteBuddyClassImposteriser;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -25,14 +25,13 @@ import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.PublicPrivateCloud
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.TestGroupImpl;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.TestUserImpl;
 import com.uk.xarixa.cloud.filesystem.core.security.AnonymousUserPrincipal;
-import com.uk.xarixa.cloud.filesystem.core.utils.ResettingAclIterator;
 
 
 @RunWith(BlockJUnit4ClassRunner.class)
 public class ResettingAclIteratorTest {
 	@Rule
 	public JUnitRuleMockery context = new JUnitRuleMockery() {{
-		setImposteriser(ClassImposteriser.INSTANCE);
+		setImposteriser(ByteBuddyClassImposteriser.INSTANCE);
 	}};
 
 	@Test

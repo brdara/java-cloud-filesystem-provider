@@ -11,8 +11,8 @@ import java.util.Collections;
 
 import org.jclouds.blobstore.domain.StorageType;
 import org.jmock.Expectations;
+import org.jmock.imposters.ByteBuddyClassImposteriser;
 import org.jmock.integration.junit4.JUnitRuleMockery;
-import org.jmock.lib.legacy.ClassImposteriser;
 import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,7 +38,7 @@ import com.uk.xarixa.cloud.filesystem.core.security.UserGroupLookupService;
 public class CloudFileTest {
 	@Rule
 	public JUnitRuleMockery context = new JUnitRuleMockery() {{
-		setImposteriser(ClassImposteriser.INSTANCE);
+		setImposteriser(ByteBuddyClassImposteriser.INSTANCE);
 	}};
 	
 	@Test
