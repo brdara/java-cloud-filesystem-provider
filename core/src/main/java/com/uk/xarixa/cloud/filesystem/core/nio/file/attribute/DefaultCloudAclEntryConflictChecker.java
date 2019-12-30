@@ -4,13 +4,13 @@ import java.nio.file.attribute.AclEntryType;
 import java.nio.file.attribute.GroupPrincipal;
 import java.nio.file.attribute.UserPrincipal;
 import java.security.Principal;
-import java.security.acl.Group;
-import java.security.acl.NotOwnerException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
+import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.acl.Group;
+import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.acl.NotOwnerException;
 import com.uk.xarixa.cloud.filesystem.core.security.AnonymousGroupPrincipal;
 import com.uk.xarixa.cloud.filesystem.core.security.AnonymousUserPrincipal;
 import com.uk.xarixa.cloud.filesystem.core.utils.ResettingAclIterator;

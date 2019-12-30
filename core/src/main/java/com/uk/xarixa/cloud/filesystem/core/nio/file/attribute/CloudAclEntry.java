@@ -4,7 +4,6 @@ import java.nio.file.attribute.AclEntryFlag;
 import java.nio.file.attribute.AclEntryPermission;
 import java.nio.file.attribute.AclEntryType;
 import java.security.Principal;
-import java.security.acl.AclEntry;
 import java.util.EnumSet;
 
 import org.apache.commons.lang3.builder.CompareToBuilder;
@@ -15,7 +14,7 @@ import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import com.uk.xarixa.cloud.filesystem.core.utils.SafeCloneable;
 
 /**
- * An ACL entry similar to {@link AclEntry} but it can accept any principal
+ * An ACL entry similar to {@link java.security.acl.AclEntry} but it can accept any principal
  */
 public class CloudAclEntry<T extends Principal> implements Comparable<CloudAclEntry<T>>, SafeCloneable<CloudAclEntry<T>> {
 	private final Class<T> principalClass;

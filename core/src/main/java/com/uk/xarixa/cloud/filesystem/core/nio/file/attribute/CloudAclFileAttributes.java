@@ -3,12 +3,12 @@ package com.uk.xarixa.cloud.filesystem.core.nio.file.attribute;
 import java.nio.file.attribute.AclEntryPermission;
 import java.nio.file.attribute.AclEntryType;
 import java.security.Principal;
-import java.security.acl.NotOwnerException;
 import java.util.Set;
 
 import org.jclouds.blobstore.domain.BlobAccess;
 import org.jclouds.blobstore.domain.BlobMetadata;
 
+import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.acl.NotOwnerException;
 import com.uk.xarixa.cloud.filesystem.core.security.AnonymousUserPrincipal;
 
 /**

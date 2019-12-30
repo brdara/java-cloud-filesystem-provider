@@ -12,7 +12,7 @@
 	<name>Parent POM</name>
 
 	<properties>
-		<java.version>1.11</java.version>
+		<java.version>11</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss.SSS'Z'</maven.build.timestamp.format>
@@ -25,7 +25,6 @@
 		<maven-release-plugin-version>2.5.3</maven-release-plugin-version>
 		<maven-dependency-plugin-version>2.10</maven-dependency-plugin-version>
 		<build-helper.plugin.version>1.10</build-helper.plugin.version>
-		<jacoco-plugin-version>0.8.5</jacoco-plugin-version>
 		<skipIntegrationTests>true</skipIntegrationTests>
 	</properties>
 
@@ -212,11 +211,6 @@
 						</goals>
 					</execution>
 				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>${jacoco-plugin-version}</version>
 			</plugin>
 		</plugins>
 	</build>

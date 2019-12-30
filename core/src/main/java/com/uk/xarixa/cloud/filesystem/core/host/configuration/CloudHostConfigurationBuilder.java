@@ -206,8 +206,8 @@ public class CloudHostConfigurationBuilder {
 		
 		CloudHostConfiguration cloudHostConf;
 		try {
-			cloudHostConf = cloudHostConfClass.newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			cloudHostConf = cloudHostConfClass.getConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
 			throw new RuntimeException("Couldn't create an instance of '" + cloudHostConfClass.getName() + "'", e);
 		}
 

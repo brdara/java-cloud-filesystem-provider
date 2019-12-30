@@ -321,7 +321,7 @@ public class DefaultCloudFileSystemImplementation implements CloudFileSystemImpl
 			try {
 				delete(context, path, options);
 			} catch (IOException e) {
-				if (options.contains(CloudCopyOption.FAIL_SILENTLY)) {
+				if (options.contains(DeleteOption.FAIL_SILENTLY)) {
 					LOG.warn("Delete failed for {}, slient failure specified, continuing", path, e);
 				} else {
 					throw e;

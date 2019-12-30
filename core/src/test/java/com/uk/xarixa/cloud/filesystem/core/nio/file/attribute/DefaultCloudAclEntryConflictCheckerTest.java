@@ -6,7 +6,6 @@ import java.nio.file.attribute.AclEntryType;
 import java.nio.file.attribute.GroupPrincipal;
 import java.nio.file.attribute.UserPrincipal;
 import java.security.Principal;
-import java.security.acl.NotOwnerException;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Iterator;
@@ -24,6 +23,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 
+import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.acl.NotOwnerException;
 import com.uk.xarixa.cloud.filesystem.core.security.AnonymousUserPrincipal;
 
 @RunWith(BlockJUnit4ClassRunner.class)
