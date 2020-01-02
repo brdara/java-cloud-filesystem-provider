@@ -15,9 +15,9 @@ Find documentation in each of the sub-modules. The "core" module is the place to
 The integration tests can be run against
 
 # Compatibility
-- JDK 1.8 (there is some lambda code in there)
-- Deployed and tested with JClouds 1.9.2
+- JDK 1.8 (there is some lambda code in there), JDK 11
+- Deployed and tested with JClouds 2.2.0
 
 # Known Limitations
-- ACL can only be set in AWS using the CloudFilePermission set to an instance of org.jclouds.s3.domain.AccessControlList
+- ACL can only be set in AWS using the CloudPermissionFileAttribute set to an instance of org.jclouds.s3.domain.AccessControlList
 - CloudFileChannel.map method does not obey SYNC/DSYNC

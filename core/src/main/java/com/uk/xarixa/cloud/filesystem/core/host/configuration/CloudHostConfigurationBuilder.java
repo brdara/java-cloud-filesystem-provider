@@ -114,8 +114,8 @@ public class CloudHostConfigurationBuilder {
 	}
 	
 	/**
-	 * Sets the type from a {@link CloudHostConfigurationType} annotation
-	 * @param clousHostSettingsTypeName
+	 * Sets the type from a named {@link CloudHostConfigurationType} annotation
+	 * @param cloudHostTypeName
 	 * @return
 	 */
 	public CloudHostConfigurationBuilder setType(String cloudHostTypeName) {
@@ -130,6 +130,11 @@ public class CloudHostConfigurationBuilder {
 		return this;
 	}
 
+	/**
+	 * Sets the type from a class directly of type {@link CloudHostConfiguration}
+	 * @param cloudHostSettingsClass
+	 * @return
+	 */
 	public CloudHostConfigurationBuilder setType(Class<? extends CloudHostConfiguration> cloudHostSettingsClass) {
 		this.cloudHostConfClass = cloudHostSettingsClass;
 		return this;
