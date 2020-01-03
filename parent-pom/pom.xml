@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
@@ -17,14 +18,13 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss.SSS'Z'</maven.build.timestamp.format>
 		<build.timestamp>${maven.build.timestamp}</build.timestamp>
-		<maven-clean-plugin.version>3.0.0</maven-clean-plugin.version>
-		<maven-surefire-report-plugin-version>2.19.1</maven-surefire-report-plugin-version>
-		<maven-surefire-plugin-version>2.19.1</maven-surefire-plugin-version>
-		<maven-failsafe-plugin-version>2.19.1</maven-failsafe-plugin-version>
-		<maven-compiler-plugin-version>3.5.1</maven-compiler-plugin-version>
-		<maven-release-plugin-version>2.5.3</maven-release-plugin-version>
-		<maven-dependency-plugin-version>2.10</maven-dependency-plugin-version>
-		<build-helper.plugin.version>1.10</build-helper.plugin.version>
+		<maven-clean-plugin.version>3.1.0</maven-clean-plugin.version>
+		<maven-surefire-report-plugin-version>3.0.0-M4</maven-surefire-report-plugin-version>
+		<maven-surefire-plugin-version>3.0.0-M4</maven-surefire-plugin-version>
+		<maven-failsafe-plugin-version>3.0.0-M4</maven-failsafe-plugin-version>
+		<maven-compiler-plugin-version>3.8.1</maven-compiler-plugin-version>
+		<maven-dependency-plugin-version>3.1.1</maven-dependency-plugin-version>
+		<build-helper.plugin.version>3.0.0</build-helper.plugin.version>
 		<skipIntegrationTests>true</skipIntegrationTests>
 	</properties>
 
@@ -35,12 +35,8 @@
 			<plugins>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-release-plugin</artifactId>
-					<version>${maven-release-plugin-version}</version>
-					<configuration>
-						<tagNameFormat>@{project.groupId}-@{project.artifactId}-@{project.version}</tagNameFormat>
-						<preparationGoals>clean install</preparationGoals>
-					</configuration>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>3.0.0-M3</version>
 				</plugin>
 				<plugin>
 					<artifactId>maven-clean-plugin</artifactId>
@@ -79,7 +75,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
-					<version>1.7</version>
+					<version>1.8</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -174,12 +170,48 @@
 				<plugin>
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>properties-maven-plugin</artifactId>
-					<version>1.0-alpha-2</version>
+					<version>1.0.0</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>3.2.0</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
 
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>enforce-versions</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<bannedPlugins>
+									<!-- will only display a warning but does not fail the build. -->
+									<level>WARN</level>
+									<excludes>
+										<exclude>org.apache.maven.plugins:maven-verifier-plugin</exclude>
+									</excludes>
+									<message>Please consider using the maven-invoker-plugin
+										(http://maven.apache.org/plugins/maven-invoker-plugin/)!</message>
+								</bannedPlugins>
+								<requireMavenVersion>
+									<version>[3.0.5,]</version>
+								</requireMavenVersion>
+								<requireJavaVersion>
+									<version>[1.8,]</version>
+								</requireJavaVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>

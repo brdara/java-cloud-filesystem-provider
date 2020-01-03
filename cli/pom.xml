@@ -86,7 +86,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-assembly-plugin</artifactId>
 				<configuration>
-					<descriptor>assembly.xml</descriptor>
+					<descriptors>
+						<descriptor>assembly.xml</descriptor>
+					</descriptors>
 					<finalName>jcfs-cli-${pom.version}</finalName>
 				</configuration>
 				<executions>

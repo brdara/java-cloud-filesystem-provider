@@ -61,6 +61,10 @@ public final class FileSystemProviderHelper {
 	 * @return
 	 */
 	public static FileSystem getFileSystem(URI uri) {
+		if (StringUtils.isBlank(uri.getScheme())) {
+			throw new ProviderNotFoundException("No scheme specified in filesystem URI: " + uri.toString());
+		}
+
 		try {
 			return FileSystems.getFileSystem(uri);
 		} catch (FileSystemNotFoundException | ProviderNotFoundException e) {
