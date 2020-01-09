@@ -1,7 +1,8 @@
 package com.uk.xarixa.cloud.filesystem.core.nio.file.attribute;
 
 import java.nio.file.attribute.GroupPrincipal;
-import java.security.acl.Group;
+
+import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.acl.Group;
 
 /**
  * A group class which implements both the file {@link GroupPrincipal} and {@link Group}.

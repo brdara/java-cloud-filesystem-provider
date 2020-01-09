@@ -107,10 +107,8 @@ public class ZipCommand extends AbstractCliCommand {
 		final String destinationFsSeparator = destinationPath.getFileSystem().getSeparator();
 		
 		// Create the ZIP
-		ZipOutputStream zipOut = createDestinationZip(destinationPath);
-
 		// Cycle through all of the paths and add them
-		try {
+		try (ZipOutputStream zipOut = createDestinationZip(destinationPath)) {
 			for (int i=0; i<commandParameters.size() - 1; i++) {
 		    	URI sourceUri;
 		    	try {
@@ -157,8 +155,10 @@ public class ZipCommand extends AbstractCliCommand {
 		    		return false;
 				}
 	    	}
-		} finally {
-			IOUtils.closeQuietly(zipOut);
+		} catch (IOException e) {
+			System.err.println("Exception creating ZIP file at '" + destinationPath + "': " + e.getMessage());
+			e.printStackTrace();
+			return false;
 		}
 
     	return true;

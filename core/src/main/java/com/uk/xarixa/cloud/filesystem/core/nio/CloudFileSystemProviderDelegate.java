@@ -2,7 +2,6 @@ package com.uk.xarixa.cloud.filesystem.core.nio;
 
 import java.io.IOException;
 import java.net.URI;
-import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessMode;
@@ -25,7 +24,6 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;

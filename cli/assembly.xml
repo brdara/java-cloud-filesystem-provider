@@ -18,7 +18,7 @@
 		</fileSet>
 		<fileSet>
 			<directory>target</directory>
-			<outputDirectory>/</outputDirectory>
+			<outputDirectory/>
 			<includes>
 				<include>*.jar</include>
 				<include>*.xml</include>
@@ -26,7 +26,7 @@
 		</fileSet>
 		<fileSet>
 			<directory>target</directory>
-			<outputDirectory>/</outputDirectory>
+			<outputDirectory/>
 			<includes>
 				<include>cli.cmd</include>
 			</includes>
@@ -35,7 +35,7 @@
 		</fileSet>
 		<fileSet>
 			<directory>target</directory>
-			<outputDirectory>/</outputDirectory>
+			<outputDirectory/>
 			<includes>
 				<include>cli.cmd</include>
 			</includes>
@@ -43,7 +43,7 @@
 		</fileSet>
 		<fileSet>
 			<directory>target</directory>
-			<outputDirectory>/</outputDirectory>
+			<outputDirectory/>
 			<includes>
 				<include>cli.sh</include>
 			</includes>
