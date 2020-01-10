@@ -101,9 +101,7 @@ public class Cli {
 	            	if (arguments.length > 0) {
 		            	if (StringUtils.equals(arguments[0], "exit") || StringUtils.equals(arguments[0], "quit")) {
 			            	running.set(false);
-		            	}
-
-		            	if (!processCliCommands(arguments)) {
+		            	} else if (!processCliCommands(arguments)) {
 		            		System.err.println("Command not understood");
 		            	}
 	            	}
@@ -213,7 +211,7 @@ public class Cli {
 	    parser.addArgument("--" + PROPERTY_FILE_ARG).action(Arguments.append()).dest(PROPERTY_FILE_ARG).metavar("FILE")
     		.help("Specify property files to use for interpolating properties in scripts or commands, e.g. accessKey=${awsAccessKey} can load the 'awsAccessKey' property from one of the files");
 
-	    try (Terminal term = TerminalBuilder.builder().type("unix").name("Java FileSystem").build()) {
+	    try (Terminal term = TerminalBuilder.builder().system(true).name("Java Cloud FileSystem").build()) {
 			System.out.println("Welcome to the Java Cloud FileSystem Provider CLI");
 			Cli cli = new Cli(term);
 		    executeCommandLineIfExists(cli, args, parser);

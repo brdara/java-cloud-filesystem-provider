@@ -1,7 +1,10 @@
 package com.uk.xarixa.cloud.filesystem.core.nio;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
+import java.nio.channels.AsynchronousFileChannel;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.AccessMode;
@@ -24,6 +27,7 @@ import java.util.Collection;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.multimap.HashSetValuedHashMap;
@@ -334,6 +338,47 @@ public class CloudFileSystemProviderDelegate extends FileSystemProvider implemen
 		CloudPath cloudPath = getCloudPath(path);
 		CloudFileSystemImplementation sourceCloudFileSystemImplementation = getCloudFileSystemImplementation(cloudPath);
 		sourceCloudFileSystemImplementation.setAttribute(getBlobStoreContext(cloudPath), cloudPath, attribute, value);
+	}
+
+	@Override
+	public FileSystem newFileSystem(Path path, Map<String, ?> env) throws IOException {
+		throw new UnsupportedOperationException("Cannot create a cloud filesystem from a file");
+	}
+
+	@Override
+	public InputStream newInputStream(Path path, OpenOption... options) throws IOException {
+		return super.newInputStream(path, options);
+	}
+
+	@Override
+	public OutputStream newOutputStream(Path path, OpenOption... options) throws IOException {
+		return super.newOutputStream(path, options);
+	}
+
+	@Override
+	public AsynchronousFileChannel newAsynchronousFileChannel(Path path, Set<? extends OpenOption> options,
+			ExecutorService executor, FileAttribute<?>... attrs) throws IOException {
+		return super.newAsynchronousFileChannel(path, options, executor, attrs);
+	}
+
+	@Override
+	public void createLink(Path link, Path existing) throws IOException {
+		super.createLink(link, existing);
+	}
+
+	@Override
+	public boolean deleteIfExists(Path path) throws IOException {
+		return super.deleteIfExists(path);
+	}
+
+	@Override
+	public void createSymbolicLink(Path link, Path target, FileAttribute<?>... attrs) throws IOException {
+		super.createSymbolicLink(link, target, attrs);
+	}
+
+	@Override
+	public Path readSymbolicLink(Path link) throws IOException {
+		return super.readSymbolicLink(link);
 	}
 
 }
