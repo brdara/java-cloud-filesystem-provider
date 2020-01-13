@@ -284,26 +284,27 @@ public class CloudFile extends File implements AclConstants {
 			}
 		};
 
-		DirectoryStream<Path> dirStream = Files.newDirectoryStream(cloudPath, cloudPathFilter);
-		List<T> filenames = new ArrayList<>();
-		
-		// Iteratively perform a file listing
-		Iterator<Path> iterator = dirStream.iterator();
-		while (iterator.hasNext()) {
-			CloudPath nextPath = (CloudPath)iterator.next();
-
-			// Create object of the appropriate type
-			T filenameObj;
-			if (returnType.equals(String.class)) {
-				filenameObj = (T)nextPath.toAbsolutePath().toString();
-			} else {
-				filenameObj = (T)new CloudFile(nextPath);
-			}
+		try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(cloudPath, cloudPathFilter)) {
+			List<T> filenames = new ArrayList<>();
 			
-			filenames.add(filenameObj);
-		}
-		
-		return filenames;
+			// Iteratively perform a file listing
+			Iterator<Path> iterator = dirStream.iterator();
+			while (iterator.hasNext()) {
+				CloudPath nextPath = (CloudPath)iterator.next();
+	
+				// Create object of the appropriate type
+				T filenameObj;
+				if (returnType.equals(String.class)) {
+					filenameObj = (T)nextPath.toAbsolutePath().toString();
+				} else {
+					filenameObj = (T)new CloudFile(nextPath);
+				}
+				
+				filenames.add(filenameObj);
+			}
+
+			return filenames;
+		}		
 	}
 
 	@Override

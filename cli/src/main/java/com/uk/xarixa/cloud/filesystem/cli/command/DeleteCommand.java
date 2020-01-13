@@ -8,9 +8,11 @@ import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.spi.FileSystemProvider;
-import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import com.google.common.collect.Lists;
 import com.uk.xarixa.cloud.filesystem.cli.Cli;
@@ -131,8 +133,29 @@ public class DeleteCommand extends AbstractCliCommand {
 			}
 		} else {
 
+			// Store the directories with those containing most elements at the top of the set
+			SortedSet<Path> directories = new TreeSet<>(new Comparator<Path>() {
+				@Override
+				public int compare(Path o1, Path o2) {
+					if (o1.getParent().equals(o2) || o1.getNameCount() > o2.getNameCount()) {
+						return -1;
+					}
+
+					if (o2.getParent().equals(o1) || o1.getNameCount() < o2.getNameCount()) {
+						return 1;
+					}
+					
+					// Never return 0 unless the paths are equal
+					if (o1.equals(o2)) {
+						// Duplicate path
+						return 0;
+					}
+
+					return 1;
+				}
+			});
+
 			// Iterate across the directories, deleting all content
-			List<Path> directories = new ArrayList<>();
 			if (!FileSystemProviderHelper.iterateOverDirectoryContents(dirPath.getFileSystem(), Optional.ofNullable(dirPath),
 				PathFilters.ACCEPT_ALL_FILTER, recursive,
 					subPath -> {
@@ -148,6 +171,7 @@ public class DeleteCommand extends AbstractCliCommand {
 				System.err.println("Could not complete deletion of '" + dirPath.toAbsolutePath() + "'");
 			} else {
 				directories.add(dirPath);
+				System.out.println("Deleting directories: " + directories);
 
 				// Now delete the directories
 				for (Path directory : directories) {

@@ -25,6 +25,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.slf4j.Logger;
@@ -303,7 +304,7 @@ public final class FileSystemProviderHelper {
 		Path path = dirIterationPaths.getResultPath();
 		boolean printRecursive;
 		FileSystemProvider provider = fileSystem.provider();
-		DirectoryStream<Path> dirStream;
+		DirectoryStream<Path> dirStream = null;
 
 		// Directory listing
 		try {
@@ -320,30 +321,38 @@ public final class FileSystemProviderHelper {
 				printRecursive = recursiveListing;
 			}
 		} catch (Exception e) {
+			if (dirStream != null) {
+				IOUtils.closeQuietly(dirStream);
+			}
+
 			LOG.error("Could not list directories for path '{}'", path, e);
 			return false;
 		}
 
 		// For each result in the dir 
-		Iterator<Path> paths = dirStream.iterator();
-		while (paths.hasNext()) {
-			Path nextPath = paths.next();
-			DirectoryIterationPaths nextDirIterationPaths =
-					new DirectoryIterationPaths(dirIterationPaths, nextPath);
-			LOG.debug("Iterating through next path {}", nextDirIterationPaths);
-			
-			// Can throw CancelException to terminate recursion/listing
-			if (!directoryContentAction.apply(nextDirIterationPaths)) {
-				return false;
-			}
-
-			// Recurse through subdirs as required
-			if (printRecursive && Files.isDirectory(nextPath)) {
-				if (!iterateOverDirectoryContents(fileSystem, nextDirIterationPaths, pathFilter,
-						printRecursive, directoryContentAction)) {
+		try {
+			Iterator<Path> paths = dirStream.iterator();
+			while (paths.hasNext()) {
+				Path nextPath = paths.next();
+				DirectoryIterationPaths nextDirIterationPaths =
+						new DirectoryIterationPaths(dirIterationPaths, nextPath);
+				LOG.debug("Iterating through next path {}", nextDirIterationPaths);
+				
+				// Can throw CancelException to terminate recursion/listing
+				if (!directoryContentAction.apply(nextDirIterationPaths)) {
 					return false;
 				}
+	
+				// Recurse through subdirs as required
+				if (printRecursive && Files.isDirectory(nextPath)) {
+					if (!iterateOverDirectoryContents(fileSystem, nextDirIterationPaths, pathFilter,
+							printRecursive, directoryContentAction)) {
+						return false;
+					}
+				}
 			}
+		} finally {
+			IOUtils.closeQuietly(dirStream);
 		}
 		
 		return true;

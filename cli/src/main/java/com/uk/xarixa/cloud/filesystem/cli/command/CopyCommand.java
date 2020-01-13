@@ -37,6 +37,23 @@ public class CopyCommand extends AbstractCliCommand {
 	@Override
 	public void printSummaryHelp(PrintWriter out) {
 		out.println("Copies files or directories");
+		out.println("\t- Copy files on the local filesystem:");
+		out.println("\t\tcopy file:///drive1/dir1/file.txt file:///drive2/dir2/file.txt");
+		out.println("\t- Copy files on the local filesystem recursively:");
+		out.println("\t\tcopy --recursive file:///drive1/dir1/file.txt file:///drive2/dir2/file.txt");
+		out.println("\t- List files on a cloud filesystem mounted as 's3-host':");
+		out.println("\t\tlist cloud://s3-host/container/dir");
+		out.println("\t- List files recursively in all directories and sub-directories on a cloud"
+				+ "filesystem mounted as 's3-host':");
+		out.println("\t\tlist --recursive cloud://s3-host/container/dir");
+		out.println("\t- List files recursively in all directories and sub-directories on a cloud"
+				+ "filesystem mounted as 's3-host' with GLOB-style filtering to show all files "
+				+ "ending with '.java':");
+		out.println("\t\tlist --recursive --filter=glob:**/*.java cloud://s3-host/container/dir");
+		out.println("\t- List files recursively in all directories and sub-directories on a cloud"
+				+ "filesystem mounted as 's3-host' with REGEX-stoyle filtering to show all files "
+				+ "ending with '.java':");
+		out.println("\t\tlist --recursive --filter=glob:.*\\.java cloud://s3-host/container/dir");
 	}
 
 	@Override
@@ -113,8 +130,9 @@ public class CopyCommand extends AbstractCliCommand {
 		    		sourceProvider.copy(sourcePath, destinationPath,
 			    			StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, CloudCopyOption.RECURSIVE);
 	    		} else {
-		    		sourceProvider.copy(sourcePath, destinationPath,
-		    			StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+	    			LOG.debug("Copying from a source local filesystem");
+	    			FileSystemProviderHelper.copyDirectoryBetweenProviders(sourcePath, destinationPath,
+	    					new FileSystemProviderHelper.AcceptAllFilter(), recursive);
 	    		}
 	    	} catch (ProviderMismatchException e) {
 	    		LOG.debug("Source provider with scheme {} cannot perform copy to {}, falling back to manual copy",
