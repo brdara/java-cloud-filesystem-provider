@@ -30,7 +30,6 @@ import com.uk.xarixa.cloud.filesystem.cli.Cli;
 import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.CommandOption;
 import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.ParsedCommand;
 import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper;
-import com.uk.xarixa.cloud.filesystem.core.nio.file.PathFilters;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudAclEntry;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudAclFileAttributes;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudFileAttributesView;
@@ -140,13 +139,17 @@ public class ListCommand extends AbstractCliCommand {
 		AtomicInteger pathsCounter = new AtomicInteger(0);
 
 		FileSystemProviderHelper.iterateOverDirectoryContents(fileSystem, Optional.ofNullable(path),
-				PathFilters.ACCEPT_ALL_FILTER, recursive,
+				pathFilters, recursive,
 					subPath -> {
-						pathsCounter.addAndGet(printCloudPathAttributes(fileSystem, pathFilters, subPath.getResultPath()));
+						pathsCounter.addAndGet(printCloudPathAttributes(fileSystem, subPath.getResultPath()));
 						return true;
 					});
 
 		return pathsCounter.get();
+	}
+
+	protected int printCloudPathAttributes(FileSystem fileSystem, Path path) {
+		return printCloudPathAttributes(fileSystem, null, path);
 	}
 
 	protected int printCloudPathAttributes(FileSystem fileSystem, Filter<Path> pathFilters, Path path) {

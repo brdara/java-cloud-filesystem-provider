@@ -37,28 +37,29 @@ public class CopyCommand extends AbstractCliCommand {
 	@Override
 	public void printSummaryHelp(PrintWriter out) {
 		out.println("Copies files or directories");
-		out.println("\t- Copy files on the local filesystem:");
-		out.println("\t\tcopy file:///drive1/dir1/file.txt file:///drive2/dir2/file.txt");
-		out.println("\t- Copy files on the local filesystem recursively:");
-		out.println("\t\tcopy --recursive file:///drive1/dir1/file.txt file:///drive2/dir2/file.txt");
-		out.println("\t- List files on a cloud filesystem mounted as 's3-host':");
-		out.println("\t\tlist cloud://s3-host/container/dir");
-		out.println("\t- List files recursively in all directories and sub-directories on a cloud"
-				+ "filesystem mounted as 's3-host':");
-		out.println("\t\tlist --recursive cloud://s3-host/container/dir");
-		out.println("\t- List files recursively in all directories and sub-directories on a cloud"
-				+ "filesystem mounted as 's3-host' with GLOB-style filtering to show all files "
-				+ "ending with '.java':");
-		out.println("\t\tlist --recursive --filter=glob:**/*.java cloud://s3-host/container/dir");
-		out.println("\t- List files recursively in all directories and sub-directories on a cloud"
-				+ "filesystem mounted as 's3-host' with REGEX-stoyle filtering to show all files "
-				+ "ending with '.java':");
-		out.println("\t\tlist --recursive --filter=glob:.*\\.java cloud://s3-host/container/dir");
 	}
 
 	@Override
 	public void printFullHelp(PrintWriter out) {
 		out.println("Copies one or more files or directories from a filesystem to another filesystem");
+		out.println("\t- Copy files on the local filesystem:");
+		out.println("\t\tcopy file:///drive1/dir1/file.txt file:///drive2/dir2/file.txt");
+		out.println("\t- Copy files on the local filesystem recursively:");
+		out.println("\t\tcopy --recursive file:///drive1/dir1/file.txt file:///drive2/dir2/file.txt");
+		out.println("\t- Copy files and directories from recursively local filesystem to a cloud filesystem mounted as 's3-host':");
+		out.println("\t\tcopy --recursive file:///drive1/dir1 cloud://s3-host/container/dir");
+		out.println("\t- Copy files recursively in all directories and sub-directories on a cloud"
+				+ "filesystem mounted as 's3-host' to a cloud filesystem mounted as 's3-host2':");
+		out.println("\t\tcopy --recursive cloud://s3-host/container/dir cloud://s3-host2/container2/dir2");
+
+		out.println("\t- List files recursively in all directories and sub-directories on a cloud"
+				+ "filesystem mounted as 's3-host' with GLOB-style filtering to show all files "
+				+ "ending with '.java':");
+		out.println("\t\tlist --recursive --filter=glob:**/*.java cloud://s3-host/container/dir");
+		out.println("\t- List files recursively in all directories and sub-directories on a cloud"
+				+ "filesystem mounted as 's3-host' with REGEX-style filtering to show all files "
+				+ "ending with '.java':");
+		out.println("\t\tlist --recursive --filter=glob:.*\\.java cloud://s3-host/container/dir");
 	}
 
 	@Override
