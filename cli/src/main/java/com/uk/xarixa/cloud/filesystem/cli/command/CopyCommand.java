@@ -44,6 +44,7 @@ public class CopyCommand extends AbstractCliCommand {
 		out.println("Copies one or more files or directories from a filesystem to another filesystem");
 		out.println("\t- Copy files on the local filesystem:");
 		out.println("\t\tcopy file:///drive1/dir1/file.txt file:///drive2/dir2/file.txt");
+		out.println("\t\tcopy file:///C:/dir1/file.txt file:///drive2/dir2/file.txt");
 		out.println("\t- Copy files on the local filesystem recursively:");
 		out.println("\t\tcopy --recursive file:///drive1/dir1/file.txt file:///drive2/dir2/file.txt");
 		out.println("\t- Copy files and directories from recursively local filesystem to a cloud filesystem mounted as 's3-host':");
@@ -131,9 +132,14 @@ public class CopyCommand extends AbstractCliCommand {
 		    		sourceProvider.copy(sourcePath, destinationPath,
 			    			StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, CloudCopyOption.RECURSIVE);
 	    		} else {
-	    			LOG.debug("Copying from a source local filesystem");
-	    			FileSystemProviderHelper.copyDirectoryBetweenProviders(sourcePath, destinationPath,
-	    					new FileSystemProviderHelper.AcceptAllFilter(), recursive);
+	    			if (Files.isDirectory(sourcePath)) {
+		    			LOG.debug("Copying file from a source local filesystem");
+		    			FileSystemProviderHelper.copyDirectoryBetweenProviders(sourcePath, destinationPath,
+		    					new FileSystemProviderHelper.AcceptAllFilter(), recursive);
+	    			} else {
+		    			LOG.debug("Copying directory from a source local filesystem");
+		    			FileSystemProviderHelper.copyFileBetweenProviders(sourcePath, destinationPath);
+	    			}
 	    		}
 	    	} catch (ProviderMismatchException e) {
 	    		LOG.debug("Source provider with scheme {} cannot perform copy to {}, falling back to manual copy",

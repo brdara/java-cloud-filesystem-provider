@@ -22,6 +22,8 @@ import java.util.regex.Matcher;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.jline.builtins.Builtins;
+import org.jline.builtins.Completers.SystemCompleter;
 import org.jline.reader.LineReader;
 import org.jline.reader.LineReaderBuilder;
 import org.jline.terminal.Terminal;
@@ -240,7 +242,7 @@ public class Cli {
 		if (propFiles != null && !propFiles.isEmpty()) {
 			for (String propFilename : propFiles) {
 				Properties props = new Properties();
-				File propFile = new File(propFilename);
+				File propFile = StringUtils.startsWith(propFilename, ".") ? new File(new File(System.getProperty("user.dir")), propFilename) : new File(propFilename);
 	
 				if (!propFile.exists() || !propFile.canRead()) {
 					System.err.println("Property file " + propFile + " does not exist or is not readable, ignoring this file");
