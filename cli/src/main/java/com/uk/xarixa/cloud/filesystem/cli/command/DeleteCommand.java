@@ -28,7 +28,6 @@ import com.uk.xarixa.cloud.filesystem.core.nio.options.DeleteOption;
  * Deletes one or more containers, directories or files
  */
 public class DeleteCommand extends AbstractCliCommand {
-	private static final String RECURSIVE_OPTION = "recursive";
 	private static final List<CommandOption> options = Lists.newArrayList(new CommandOption(RECURSIVE_OPTION));
 
 	@Override

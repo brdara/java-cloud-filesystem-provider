@@ -19,7 +19,6 @@ import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper;
 
 public class MkdirCommand extends AbstractCliCommand {
 	private static final Logger LOG = LoggerFactory.getLogger(MkdirCommand.class);
-	private static final String RECURSIVE_OPTION = "recursive";
 	private static final List<CommandOption> options = Lists.newArrayList(new CommandOption(RECURSIVE_OPTION));
 
 	@Override

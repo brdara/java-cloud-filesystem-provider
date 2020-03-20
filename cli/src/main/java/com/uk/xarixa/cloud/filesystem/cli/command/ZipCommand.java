@@ -32,8 +32,6 @@ import com.uk.xarixa.cloud.filesystem.core.nio.file.PathFilters;
 
 public class ZipCommand extends AbstractCliCommand {
 	private static final Logger LOG = LoggerFactory.getLogger(ZipCommand.class);
-	private static final String RECURSIVE_OPTION = "recursive";
-	private static final String FILTER_OPTION = "filter";
 	private static final List<CommandOption> options =
 			Lists.newArrayList(new CommandOption(RECURSIVE_OPTION), new CommandOption(FILTER_OPTION, true, true));
 

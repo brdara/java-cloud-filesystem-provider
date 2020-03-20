@@ -15,6 +15,8 @@ import com.uk.xarixa.cloud.filesystem.core.nio.file.PathFilters.AggregateOrFilte
 import com.uk.xarixa.cloud.filesystem.core.utils.DefaultPathMatcher;
 
 public abstract class AbstractCliCommand implements CliCommand, Comparable<CliCommand> {
+	static final String RECURSIVE_OPTION = "recursive";
+	static final String FILTER_OPTION = "filter";
 
 	public final boolean execute(String[] commandArguments) {
 		ParsedCommand parsedCommand = CliCommandHelper.parseCommand(getCommandOptions(), commandArguments, "--");
@@ -107,6 +109,10 @@ public abstract class AbstractCliCommand implements CliCommand, Comparable<CliCo
 		}
 
 		return orFilter;
+	}
+
+	public boolean isAcceptAllPathFilter(Filter<Path> pathFilters) {
+		return PathFilters.ACCEPT_ALL_FILTER.equals(pathFilters);
 	}
 
 }

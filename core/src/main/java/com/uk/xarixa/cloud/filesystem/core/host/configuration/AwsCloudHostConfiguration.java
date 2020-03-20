@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import com.uk.xarixa.cloud.filesystem.core.host.CloudHostConfigurationType;
 import com.uk.xarixa.cloud.filesystem.core.nio.AwsCloudFileSystemImplementation;
 import com.uk.xarixa.cloud.filesystem.core.nio.CloudFileSystemImplementation;
+import com.uk.xarixa.cloud.filesystem.core.nio.file.CloudWatchServiceFactory;
+import com.uk.xarixa.cloud.filesystem.core.nio.file.PollingCloudWatchServiceFactory;
 
 /**
  * AWS cloud settings
@@ -16,25 +18,31 @@ import com.uk.xarixa.cloud.filesystem.core.nio.CloudFileSystemImplementation;
 public class AwsCloudHostConfiguration extends AbstractDefaultCloudHostConfiguration {
 	private final static Logger LOG = LoggerFactory.getLogger(AwsCloudHostConfiguration.class);
 	private static AwsCloudFileSystemImplementation awsCloudFileSystemImplementation = new AwsCloudFileSystemImplementation();
+	private static PollingCloudWatchServiceFactory cloudWatchServiceFactory = new PollingCloudWatchServiceFactory();
 	private String accessKey;
 	private String secretKey;
 
 	String getAccessKey() {
 		return accessKey;
 	}
+
 	public void setAccessKey(String accessKey) {
 		this.accessKey = accessKey;
 	}
+
 	String getSecretKey() {
 		return secretKey;
 	}
+
 	public void setSecretKey(String secretKey) {
 		this.secretKey = secretKey;
 	}
+
 	@Override
 	public CloudFileSystemImplementation getDefaultCloudFileSystemImplementation() {
 		return awsCloudFileSystemImplementation;
 	}
+
 	@Override
 	public BlobStoreContext createBlobStoreContextInternal() {
 		LOG.debug("Initialising AWS blob view for cloud host settings {}", getName());
@@ -43,4 +51,10 @@ public class AwsCloudHostConfiguration extends AbstractDefaultCloudHostConfigura
                 .buildView(BlobStoreContext.class);
 
 	}
+	
+	@Override
+	protected CloudWatchServiceFactory getDefaultWatchServiceFactory() {
+		return cloudWatchServiceFactory;
+	}
+
 }

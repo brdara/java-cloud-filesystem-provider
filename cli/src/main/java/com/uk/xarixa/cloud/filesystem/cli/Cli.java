@@ -41,6 +41,7 @@ import com.uk.xarixa.cloud.filesystem.cli.command.MkdirCommand;
 import com.uk.xarixa.cloud.filesystem.cli.command.MountCommand;
 import com.uk.xarixa.cloud.filesystem.cli.command.ZipCommand;
 import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper;
+import com.uk.xarixa.cloud.filesystem.core.scheduling.SchedulingService;
 import com.uk.xarixa.cloud.filesystem.core.utils.OptimizedPatternMatcher;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
@@ -221,6 +222,14 @@ public class Cli {
 			System.out.println("Goodbye!");
 		} catch (IOException e) {
 			throw new RuntimeException("Cannot build terminal", e);
+		}
+	    
+	    try {
+			SchedulingService.getInstance().shutdown();
+		} catch (Throwable e) {
+			LOG.error("Error shutting down the schedule service", e);
+			System.err.println("Error shutting down the schedule service");
+			e.printStackTrace();
 		}
 	}
 

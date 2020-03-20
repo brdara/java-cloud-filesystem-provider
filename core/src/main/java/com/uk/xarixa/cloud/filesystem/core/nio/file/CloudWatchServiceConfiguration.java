@@ -12,5 +12,11 @@ public interface CloudWatchServiceConfiguration {
 	 * @return
 	 */
 	long getPollTimeMs();
+	
+	/**
+	 * Points to a directory which is used to store the sync state
+	 * @return
+	 */
+	String localSyncDirectory();
 
 }

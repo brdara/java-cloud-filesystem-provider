@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -26,10 +27,13 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Lists;
 import com.google.common.hash.HashCode;
+import com.scalified.tree.TreeNode;
+import com.scalified.tree.multinode.ArrayMultiTreeNode;
 import com.uk.xarixa.cloud.filesystem.cli.Cli;
 import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.CommandOption;
 import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.ParsedCommand;
 import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper;
+import com.uk.xarixa.cloud.filesystem.core.nio.file.TrackedFileEntry;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudAclEntry;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudAclFileAttributes;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudFileAttributesView;
@@ -42,8 +46,6 @@ import com.uk.xarixa.cloud.filesystem.core.nio.file.attribute.CloudFileAttribute
  */
 public class ListCommand extends AbstractCliCommand {
 	private static final Logger LOG = LoggerFactory.getLogger(ListCommand.class);
-	private static final String RECURSIVE_OPTION = "recursive";
-	private static final String FILTER_OPTION = "filter";
 	private static final List<CommandOption> options =
 			Lists.newArrayList(new CommandOption(RECURSIVE_OPTION), new CommandOption(FILTER_OPTION, true, true));
 

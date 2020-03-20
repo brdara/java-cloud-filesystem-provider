@@ -33,8 +33,10 @@ import com.uk.xarixa.cloud.filesystem.core.utils.PathIterator;
 public class CloudPath implements Path {
 	public static final char DEFAULT_PATH_SEPARATOR_CHAR = '/';
 	public static final String DEFAULT_PATH_SEPARATOR = new String(new char[] {DEFAULT_PATH_SEPARATOR_CHAR});
+	private static final long serialVersionUID = -8027874128870414683L;
 	private static final Modifier[] EMPTY_MODIFIERS_ARRAY = new Modifier[0];
 	private static final Logger LOG = LoggerFactory.getLogger(CloudPath.class);
+
 	private final CloudFileSystem fileSystem;
 	private final boolean isRoot;
 	private final boolean isAbsolute;

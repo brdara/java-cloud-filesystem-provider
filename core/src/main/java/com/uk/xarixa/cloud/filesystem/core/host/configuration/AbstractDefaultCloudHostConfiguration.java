@@ -13,7 +13,7 @@ import com.uk.xarixa.cloud.filesystem.core.nio.CloudPath;
 import com.uk.xarixa.cloud.filesystem.core.nio.DefaultCloudFileSystemImplementation;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.CloudWatchService;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.CloudWatchServiceFactory;
-import com.uk.xarixa.cloud.filesystem.core.nio.file.DefaultCloudWatchServiceConfiguration;
+import com.uk.xarixa.cloud.filesystem.core.nio.file.SimplePollingCloudWatchServiceConfiguration;
 import com.uk.xarixa.cloud.filesystem.core.security.AnonymousUserPrincipalService;
 import com.uk.xarixa.cloud.filesystem.core.security.CloudHostSecurityManager;
 import com.uk.xarixa.cloud.filesystem.core.security.DeferringCloudHostSecurityManager;
@@ -189,7 +189,7 @@ public abstract class AbstractDefaultCloudHostConfiguration extends AbstractClou
 			return null;
 		}
 
-		return factory.createWatchService(new DefaultCloudWatchServiceConfiguration(watchServiceCloudPollTimeMs));
+		return factory.createWatchService(new SimplePollingCloudWatchServiceConfiguration(watchServiceCloudPollTimeMs));
 	}
 	
 	public void setCloudHostSecurityManagerClassName(String className) {

@@ -3,6 +3,7 @@ package com.uk.xarixa.cloud.filesystem.cli.command;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.DirectoryStream.Filter;
 import java.nio.file.FileSystem;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -21,12 +22,10 @@ import com.uk.xarixa.cloud.filesystem.cli.command.CliCommandHelper.ParsedCommand
 import com.uk.xarixa.cloud.filesystem.core.nio.CloudFileSystemProvider;
 import com.uk.xarixa.cloud.filesystem.core.nio.CloudPathException;
 import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper;
-import com.uk.xarixa.cloud.filesystem.core.nio.file.PathFilters;
 import com.uk.xarixa.cloud.filesystem.core.nio.options.CloudCopyOption;
 
 public class CopyCommand extends AbstractCliCommand {
 	private static final Logger LOG = LoggerFactory.getLogger(CopyCommand.class);
-	private static final String RECURSIVE_OPTION = "recursive";
 	private static final List<CommandOption> options = Lists.newArrayList(new CommandOption(RECURSIVE_OPTION));
 
 	@Override
@@ -53,14 +52,14 @@ public class CopyCommand extends AbstractCliCommand {
 				+ "filesystem mounted as 's3-host' to a cloud filesystem mounted as 's3-host2':");
 		out.println("\t\tcopy --recursive cloud://s3-host/container/dir cloud://s3-host2/container2/dir2");
 
-		out.println("\t- List files recursively in all directories and sub-directories on a cloud"
-				+ "filesystem mounted as 's3-host' with GLOB-style filtering to show all files "
+		out.println("\t- Copy files recursively in all directories and sub-directories on a cloud"
+				+ "filesystem mounted as 's3-host' with GLOB-style filtering to copy all files "
 				+ "ending with '.java':");
-		out.println("\t\tlist --recursive --filter=glob:**/*.java cloud://s3-host/container/dir");
-		out.println("\t- List files recursively in all directories and sub-directories on a cloud"
-				+ "filesystem mounted as 's3-host' with REGEX-style filtering to show all files "
+		out.println("\t\tcopy --recursive --filter=glob:**/*.java cloud://s3-host/container/dir");
+		out.println("\t- Copy files recursively in all directories and sub-directories on a cloud"
+				+ "filesystem mounted as 's3-host' with REGEX-style filtering to copy all files "
 				+ "ending with '.java':");
-		out.println("\t\tlist --recursive --filter=glob:.*\\.java cloud://s3-host/container/dir");
+		out.println("\t\tcopy --recursive --filter=glob:.*\\.java cloud://s3-host/container/dir");
 	}
 
 	@Override
@@ -108,7 +107,11 @@ public class CopyCommand extends AbstractCliCommand {
 	    	if (fileSystem == null) {
 	    		System.err.println("No file system alias called '" + sourceUri.getHost());
 	    	}
-	
+
+	    	// Recreate filters as necessary
+			Filter<Path> pathFilters =
+					createPathFilters(parsedCommand.getCommandOptionsByName(FILTER_OPTION), fileSystem.getSeparator());
+
 	    	FileSystemProvider sourceProvider = fileSystem.provider();
 	    	Path sourcePath;
 	    	try {
@@ -128,16 +131,19 @@ public class CopyCommand extends AbstractCliCommand {
 	    	}
 
 	    	try {
-	    		if (recursive && sourceProvider instanceof CloudFileSystemProvider) {
+	    		if (recursive && sourceProvider instanceof CloudFileSystemProvider && !isAcceptAllPathFilter(pathFilters)) {
 		    		sourceProvider.copy(sourcePath, destinationPath,
 			    			StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING, CloudCopyOption.RECURSIVE);
 	    		} else {
 	    			if (Files.isDirectory(sourcePath)) {
-		    			LOG.debug("Copying file from a source local filesystem");
-		    			FileSystemProviderHelper.copyDirectoryBetweenProviders(sourcePath, destinationPath,
-		    					new FileSystemProviderHelper.AcceptAllFilter(), recursive);
-	    			} else {
 		    			LOG.debug("Copying directory from a source local filesystem");
+		    			FileSystemProviderHelper.copyDirectoryBetweenProviders(sourcePath, destinationPath,
+		    					pathFilters, recursive);
+	    			} else {
+		    			LOG.debug("Copying file from a source local filesystem");
+		    			if (isAcceptAllPathFilter(pathFilters)) {
+		    				LOG.warn("Ignoring specified path filters for direct file copy");
+		    			}
 		    			FileSystemProviderHelper.copyFileBetweenProviders(sourcePath, destinationPath);
 	    			}
 	    		}
@@ -149,9 +155,14 @@ public class CopyCommand extends AbstractCliCommand {
 		    	// Windows FS provider implemenation doesn't let you copy using it as the source
 	    		// to another destintation provider implementation like our cloud one, da-da-dumb
 	    		if (Files.isDirectory(sourcePath)) {
+	    			LOG.debug("Copying directory from a source local filesystem");
 	    			filesCopied = FileSystemProviderHelper.copyDirectoryBetweenProviders(sourcePath,
-	    					destinationPath, PathFilters.ACCEPT_ALL_FILTER, recursive);
+	    					destinationPath, pathFilters, recursive);
 	    		} else {
+	    			LOG.debug("Copying file from a source local filesystem");
+	    			if (isAcceptAllPathFilter(pathFilters)) {
+	    				LOG.warn("Ignoring specified path filters for direct file copy");
+	    			}
 	    			filesCopied = FileSystemProviderHelper.copyFileBetweenProviders(sourcePath, destinationPath);
 	    		}
 	    		
