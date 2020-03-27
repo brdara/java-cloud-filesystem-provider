@@ -15,10 +15,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.BlockJUnit4ClassRunner;
 import org.quartz.JobDataMap;
+import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
 import com.scalified.tree.TreeNode;
+import com.sun.nio.file.ExtendedWatchEventModifier;
 import com.uk.xarixa.cloud.filesystem.core.nio.CloudPath;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.FileTreeComparisonEvent.ComparisonResult;
 import com.uk.xarixa.cloud.filesystem.core.nio.file.FileTreeComparisonEvent.ComparisonSide;
@@ -36,15 +38,12 @@ public class PollingWatchServiceJobTest extends AbstractFileTestsHelper {
 	void postSetUp() {
 		serviceJob = new PollingWatchServiceJob();
 	}
-
-	@Test
-	public void testExecuteAddsNoEventsWhenTreeHierarchyIsEquivalent() throws IOException, JobExecutionException {
+	
+	private JobExecutionContext createJobContext(CloudPath rootPath, PollingJobWatchKey watchKey, WatchKeyReadyListener watchKeyReadyListener) throws IOException {
 		JobExecutionContext jobContext = context.mock(JobExecutionContext.class);
 		Set<Kind<?>> kinds = Collections.emptySet();
 		Set<Modifier> modifiers = Collections.emptySet();
-		CloudPath rootPath = createCloudPath("/root", true);
-		PollingJobWatchKey watchKey = new PollingJobWatchKey(rootPath);
-		WatchKeyReadyListener watchKeyReadyListener = context.mock(WatchKeyReadyListener.class);
+		JobDetail jobDetail = context.mock(JobDetail.class);
 		JobDataMap jobDataMap = new JobDataMap(Map.of(
 				PollingWatchServiceJob.JOB_KIND_KEY, kinds,
 				PollingWatchServiceJob.JOB_MODIFIERS_KEY, modifiers,
@@ -52,13 +51,24 @@ public class PollingWatchServiceJobTest extends AbstractFileTestsHelper {
 				PollingWatchServiceJob.JOB_WATCH_KEY_READY_LISTENER, watchKeyReadyListener
 		));
 
+		context.checking(new Expectations() {{
+			allowing(jobContext).getJobDetail(); will(returnValue(jobDetail));
+			allowing(jobDetail).getJobDataMap(); will(returnValue(jobDataMap));
+		}});
+		
+		return jobContext;
+	}
+
+	@Test
+	public void testExecuteAddsNoEventsWhenTreeHierarchyIsEquivalent() throws IOException, JobExecutionException {
+		CloudPath rootPath = createCloudPath("/root", true);
+		PollingJobWatchKey watchKey = new PollingJobWatchKey(rootPath);
+		WatchKeyReadyListener watchKeyReadyListener = context.mock(WatchKeyReadyListener.class);
+		JobExecutionContext jobContext = createJobContext(rootPath, watchKey, watchKeyReadyListener);
+
 		CloudPath file1 = createCloudPath("/root/file1.txt", false, createMd5Digest("File 1 content"));
 		CloudPath file2 = createCloudPath("/root/file2.txt", false, createMd5Digest("File 2 content"));
 		createDirectoryListing(rootPath, file1, file2);
-
-		context.checking(new Expectations() {{
-			allowing(jobContext).getMergedJobDataMap(); will(returnValue(jobDataMap));
-		}});
 
 		// First pass saves the state
 		serviceJob.execute(jobContext);
@@ -76,29 +86,17 @@ public class PollingWatchServiceJobTest extends AbstractFileTestsHelper {
 	}
 
 	private TreeNode<TrackedFileEntry> getPreviousState(JobExecutionContext jobContext) {
-		TreeNode<TrackedFileEntry> previousState = (TreeNode<TrackedFileEntry>)jobContext.getMergedJobDataMap().get(PollingWatchServiceJob.JOB_PREVIOUS_STATE);
+		@SuppressWarnings("unchecked")
+		TreeNode<TrackedFileEntry> previousState = (TreeNode<TrackedFileEntry>)jobContext.getJobDetail().getJobDataMap().get(PollingWatchServiceJob.JOB_PREVIOUS_STATE);
 		return previousState;
 	}
 
 	@Test
 	public void testExecuteAddsAnEventsWhenFileContentDiffers() throws IOException, JobExecutionException {
-		JobExecutionContext jobContext = context.mock(JobExecutionContext.class);
-		Set<Kind<?>> kinds = Collections.emptySet();
-		Set<Modifier> modifiers = Collections.emptySet();
 		CloudPath rootPath = createCloudPath("/root", true);
 		PollingJobWatchKey watchKey = new PollingJobWatchKey(rootPath);
 		WatchKeyReadyListener watchKeyReadyListener = context.mock(WatchKeyReadyListener.class);
-		JobDataMap jobDataMap = new JobDataMap(Map.of(
-				PollingWatchServiceJob.JOB_KIND_KEY, kinds,
-				PollingWatchServiceJob.JOB_MODIFIERS_KEY, modifiers,
-				PollingWatchServiceJob.JOB_WATCH_KEY, watchKey,
-				PollingWatchServiceJob.JOB_WATCH_KEY_READY_LISTENER, watchKeyReadyListener
-		));
-
-		// Set up the job
-		context.checking(new Expectations() {{
-			allowing(jobContext).getMergedJobDataMap(); will(returnValue(jobDataMap));
-		}});
+		JobExecutionContext jobContext = createJobContext(rootPath, watchKey, watchKeyReadyListener);
 
 		// Set up the paths
 		CloudPath file1 = createCloudPath("/root/file1.txt", false, createMd5Digest("File 1 content"));
@@ -147,23 +145,10 @@ public class PollingWatchServiceJobTest extends AbstractFileTestsHelper {
 
 	@Test
 	public void testExecuteWillDeferAddingEventsAndChangingStateIfTheWatchKeyReadyListenerDisallowsIt() throws IOException, JobExecutionException {
-		JobExecutionContext jobContext = context.mock(JobExecutionContext.class);
-		Set<Kind<?>> kinds = Collections.emptySet();
-		Set<Modifier> modifiers = Collections.emptySet();
 		CloudPath rootPath = createCloudPath("/root", true);
 		PollingJobWatchKey watchKey = new PollingJobWatchKey(rootPath);
 		WatchKeyReadyListener watchKeyReadyListener = context.mock(WatchKeyReadyListener.class);
-		JobDataMap jobDataMap = new JobDataMap(Map.of(
-				PollingWatchServiceJob.JOB_KIND_KEY, kinds,
-				PollingWatchServiceJob.JOB_MODIFIERS_KEY, modifiers,
-				PollingWatchServiceJob.JOB_WATCH_KEY, watchKey,
-				PollingWatchServiceJob.JOB_WATCH_KEY_READY_LISTENER, watchKeyReadyListener
-		));
-
-		// Set up the job
-		context.checking(new Expectations() {{
-			allowing(jobContext).getMergedJobDataMap(); will(returnValue(jobDataMap));
-		}});
+		JobExecutionContext jobContext = createJobContext(rootPath, watchKey, watchKeyReadyListener);
 
 		// Set up the paths
 		CloudPath file1 = createCloudPath("/root/file1.txt", false, createMd5Digest("File 1 content"));
@@ -235,6 +220,122 @@ public class PollingWatchServiceJobTest extends AbstractFileTestsHelper {
 		
 		// Assert that there are no more events in the watch key now
 		Assert.assertFalse(watchKey.hasEvents());
+	}
+
+	@Test
+	public void testExecuteDoesNotRecurseThroughDirectoriesWhenTheModifierIsNotSet() throws IOException, JobExecutionException {
+		CloudPath rootPath = createCloudPath("/root", true);
+		PollingJobWatchKey watchKey = new PollingJobWatchKey(rootPath);
+		WatchKeyReadyListener watchKeyReadyListener = context.mock(WatchKeyReadyListener.class);
+		JobExecutionContext jobContext = createJobContext(rootPath, watchKey, watchKeyReadyListener);
+
+		// Set up the paths
+		CloudPath file1 = createCloudPath("/root/file1.txt", false, createMd5Digest("File 1 content"));
+		CloudPath file2 = createCloudPath("/root/file2.txt", false, createMd5Digest("File 2 content"));
+		CloudPath directory1 = createCloudPath("/root/directory1", true);
+		createDirectoryListing(rootPath, file1, file2, directory1);
+
+		// Set up the paths
+//		CloudPath file1 = createCloudPath("/root/file1.txt", false, createMd5Digest("File 1 content"));
+//		CloudPath file2 = createCloudPath("/root/file2.txt", false, createMd5Digest("File 2 content"));
+//		createDirectoryListing(rootPath, file1, file2, directory1);
+
+		// Create a folder with content beneath it
+//		CloudPath file1_1 = createCloudPath("/root/directory1/file1_1.txt", false, createMd5Digest("File 1.1 content"));
+//		createDirectoryListing(directory1, file1_1);
+
+		// First pass saves the state
+		serviceJob.execute(jobContext);
+		
+		TreeNode<TrackedFileEntry> previousState = getPreviousState(jobContext);
+		Assert.assertNotNull(previousState);
+
+		// Set up a new listing with the differing content
+		CloudPath rootPath_Run2 = createCloudPath("/root", true);
+		CloudPath file1_Run2 = createCloudPath("/root/file1.txt", false, createMd5Digest("File 1 content"));
+		CloudPath file2_Run2 = createCloudPath("/root/file2.txt", false, createMd5Digest("File 2 content"));
+		CloudPath directory1_Run2 = createCloudPath("/root/directory1", true);
+		createDirectoryListing(rootPath_Run2, file1_Run2, file2_Run2, directory1_Run2);
+
+		// Create a folder with content beneath it
+//		CloudPath file1_1_Run2 = createCloudPath("/root/directory1/file1_1.txt", false, createMd5Digest("File 1.1 content MODIFIED"));
+//		createDirectoryListing(directory1_Run2, file1_1_Run2);
+
+		// Still nothing should fire because the above changed in a sub-directory which the file listing should not recurse through
+		serviceJob.execute(jobContext);
+		
+		// No changes
+		Assert.assertEquals(previousState, getPreviousState(jobContext));
+
+		// Check the events
+		Assert.assertFalse(watchKey.hasEvents());
+	}
+
+	@Test
+	public void testExecuteRecursesThroughDirectoriesWhenTheModifierIsSet() throws IOException, JobExecutionException {
+		CloudPath rootPath = createCloudPath("/root", true);
+		PollingJobWatchKey watchKey = new PollingJobWatchKey(rootPath);
+		WatchKeyReadyListener watchKeyReadyListener = context.mock(WatchKeyReadyListener.class);
+		JobExecutionContext jobContext = createJobContext(rootPath, watchKey, watchKeyReadyListener);
+		
+		// Set up recursive listings
+		jobContext.getJobDetail().getJobDataMap().put(PollingWatchServiceJob.JOB_MODIFIERS_KEY, Set.of(ExtendedWatchEventModifier.FILE_TREE));
+
+		// Set up the paths
+		CloudPath file1 = createCloudPath("/root/file1.txt", false, createMd5Digest("File 1 content"));
+		CloudPath file2 = createCloudPath("/root/file2.txt", false, createMd5Digest("File 2 content"));
+		CloudPath directory1 = createCloudPath("/root/directory1", true);
+		createDirectoryListing(rootPath, file1, file2, directory1);
+
+		// Create a folder with content beneath it
+		CloudPath file1_1 = createCloudPath("/root/directory1/file1_1.txt", false, createMd5Digest("File 1.1 content"));
+		createDirectoryListing(directory1, file1_1);
+
+		// First pass saves the state
+		serviceJob.execute(jobContext);
+		
+		// There should be nothing here
+		TreeNode<TrackedFileEntry> previousState = getPreviousState(jobContext);
+		Assert.assertNotNull(previousState);
+
+		// Set up a new listing with the differing content
+		CloudPath rootPath_Run2 = createCloudPath("/root", true);
+		CloudPath file1_Run2 = createCloudPath("/root/file1.txt", false, createMd5Digest("File 1 content"));
+		CloudPath file2_Run2 = createCloudPath("/root/file2.txt", false, createMd5Digest("File 2 content"));
+		CloudPath directory1_Run2 = createCloudPath("/root/directory1", true);
+		createDirectoryListing(rootPath_Run2, file1_Run2, file2_Run2, directory1_Run2);
+
+		// Create a folder with content beneath it
+		CloudPath file1_1_Run2 = createCloudPath("/root/directory1/file1_1.txt", false, createMd5Digest("File 1.1 content MODIFIED"));
+		createDirectoryListing(directory1_Run2, file1_1_Run2);
+
+		context.checking(new Expectations() {{
+			exactly(1).of(watchKeyReadyListener).watchKeyReady(watchKey); will(returnValue(true));	// Now succeed on this run
+			watchKey.lastQueueAttemptSucceeded();	// This would be set up in the listener
+		}});
+
+		// Still nothing should fire because the above changed in a sub-directory which the file listing should not recurse through
+		serviceJob.execute(jobContext);
+		
+		// No changes
+		Assert.assertNotEquals(previousState, getPreviousState(jobContext));
+
+		// Check the events
+		Assert.assertTrue(watchKey.hasEvents());
+		
+		// Detect the events in the watch key
+		List<WatchEvent<?>> events2 = watchKey.pollEvents();
+		Assert.assertEquals(1, events2.size());
+		WatchEvent<?> watchEvent = events2.get(0);
+		FileTreeComparisonEvent event = (FileTreeComparisonEvent)watchEvent.context();
+		Assert.assertEquals(file1_1, event.getLeftPath());
+		Assert.assertEquals(file1_1_Run2, event.getRightPath());
+		Assert.assertEquals(ComparisonResult.FILE_DIGEST_MISMATCH, event.getResult());
+		Assert.assertEquals(ComparisonSide.BOTH, event.getSide());
+
+		// Assert that there are no more events in the watch key now
+		Assert.assertFalse(watchKey.hasEvents());
+
 	}
 
 }

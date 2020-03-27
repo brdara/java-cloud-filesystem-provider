@@ -82,10 +82,10 @@ public abstract class AbstractFileTestsHelper {
 		HashCode hashCodeMock = StringUtils.isEmpty(checkSum) ? null : HashCode.fromString(checkSum);
 
 		context.checking(new Expectations() {{
-			atMost(3).of(fsProvider).readAttributes(cloudPath, BasicFileAttributes.class);
+			atMost(4).of(fsProvider).readAttributes(cloudPath, BasicFileAttributes.class);
 			will(returnValue(fileAttrMock));
 			
-			atMost(3).of(fileAttrMock).isDirectory();
+			atMost(4).of(fileAttrMock).isDirectory();
 			will(returnValue(isDirectory));
 
 			if (!isDirectory) {

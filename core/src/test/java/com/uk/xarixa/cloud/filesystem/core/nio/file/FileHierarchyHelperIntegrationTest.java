@@ -43,7 +43,7 @@ public class FileHierarchyHelperIntegrationTest extends AbstractJCloudsIntegrati
 			createDirectory(new CloudPath(containerPath, "dir1/dir1_3"));
 			createRawContent("dir1/dir1_3/file3_1", "File 2_1".getBytes("UTF-8"));
 			
-			TreeNode<TrackedFileEntry> treeRoot = FileHierarchyHelper.getTrackedFileEntryTree(root);
+			TreeNode<TrackedFileEntry> treeRoot = FileHierarchyHelper.getTrackedFileEntryTree(root, true);
 			LOG.info("Tree hierarchy: {}", treeRoot);
 			//FileHierarchyHelper.logTrackedFileEntryTreeHierarchy(treeRoot, "Current Hierarchy: {}");
 		} finally {

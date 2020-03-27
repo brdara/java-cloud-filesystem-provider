@@ -18,7 +18,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.google.common.hash.HashCode;
-import com.scalified.tree.TraversalAction;
 import com.scalified.tree.TreeNode;
 import com.scalified.tree.multinode.ArrayMultiTreeNode;
 import com.uk.xarixa.cloud.filesystem.core.nio.FileSystemProviderHelper;
@@ -139,17 +138,17 @@ public final class FileHierarchyHelper {
 	 * @param path
 	 * @return
 	 */
-	public static TreeNode<TrackedFileEntry> getTrackedFileEntryTree(Path path) {
+	public static TreeNode<TrackedFileEntry> getTrackedFileEntryTree(Path path, boolean recursive) {
 		final TreeNode<TrackedFileEntry> root = new ArrayMultiTreeNode<>(new TrackedFileEntry(path.toAbsolutePath()));
 		//final AtomicReference<TreeNode<TrackedFileEntry>> lastProcessedNode = new AtomicReference<>(root);
 
 		FileSystemProviderHelper.iterateOverDirectoryContents(path.getFileSystem(), Optional.ofNullable(path),
-				PathFilters.ACCEPT_ALL_FILTER, true,
+				PathFilters.ACCEPT_ALL_FILTER, recursive,
 					subPath -> {
 						Path resultPath = subPath.getResultPath().toAbsolutePath();
 						TreeNode<TrackedFileEntry> parent = getParentNode(root, resultPath);
 						if (parent == null) {
-							logTrackedFileEntryTreeHierarchy(root, "Could not get parent of path " + resultPath.toString() + " in hierarchy: {}");
+							LOG.error("Could not get parent of path {} in hierarchy: {}", root, resultPath.toString());
 							throw new RuntimeException("Unable to get parent of path " + resultPath.toString() + " in hierarchy");
 						}
 						addTrackedFileEntry(parent, path.getFileSystem(), resultPath);
@@ -157,40 +156,6 @@ public final class FileHierarchyHelper {
 					});
 
 		return root;
-	}
-
-	/**
-	 * Provides a log of the tree hierarchy
-	 * @param root
-	 * @param logMessage
-	 */
-	public static void logTrackedFileEntryTreeHierarchy(TreeNode<TrackedFileEntry> root, String logMessage) {
-		final StringBuilder str = new StringBuilder();
-		root.traversePreOrder(new TraversalAction<TreeNode<TrackedFileEntry>>() {
-			private int counter = 0;
-
-			@Override
-			public void perform(TreeNode<TrackedFileEntry> node) {
-				if (counter >= 1) {
-					str.append(", ");
-				}
-
-				TrackedFileEntry data = node.data();
-				str.append("{").append(data.getPath()).append(": ").append(data.isFolder());
-				if (!data.isFolder()) {
-					str.append(" (").append(data.getCheckSum()).append(")");
-				}
-				str.append("}");
-				counter++;
-			}
-
-			@Override
-			public boolean isCompleted() {
-				return false;
-			}
-			
-		});
-		LOG.debug(logMessage, str.toString());
 	}
 
 	/**

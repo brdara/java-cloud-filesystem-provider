@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.scalified.tree.TreeNode;
+import com.sun.nio.file.ExtendedWatchEventModifier;
 
 /**
  * <p>
@@ -62,16 +63,16 @@ public class PollingWatchServiceJob implements Job {
 		if (previousState == null) {
 			// Take the initial state
 			LOG.debug("Getting initial state for path {}...", path);
-			previousState = FileHierarchyHelper.getTrackedFileEntryTree(path);
+			previousState = FileHierarchyHelper.getTrackedFileEntryTree(path, modifiers.contains(ExtendedWatchEventModifier.FILE_TREE));
 			updatePreviousState(jobDataMap, previousState);
 			LOG.debug("Finished getting initial state for path {}...", path);
 		} else {
 			// Take the new state and compare
 			LOG.debug("Getting new state for path {}...", path);
-			TreeNode<TrackedFileEntry> currentState = FileHierarchyHelper.getTrackedFileEntryTree(path);
-			
+			TreeNode<TrackedFileEntry> currentState = FileHierarchyHelper.getTrackedFileEntryTree(path, modifiers.contains(ExtendedWatchEventModifier.FILE_TREE));
+
 			try {
-				if (compareFileHierarchy(watchKey, kinds, modifiers, watchKeyReadyListener, currentState, previousState)) {
+				if (compareFileHierarchy(watchKey, kinds, watchKeyReadyListener, currentState, previousState)) {
 					// Only store the new state if the watch key could be added to the queue and all events were
 					// processed
 					LOG.debug("Storing current state for {}", watchKey);
@@ -89,7 +90,7 @@ public class PollingWatchServiceJob implements Job {
 		jobDataMap.put(JOB_PREVIOUS_STATE, newState);
 	}
 
-	private boolean compareFileHierarchy(PollingJobWatchKey watchKey, Set<Kind<?>> kinds, Set<Modifier> modifiers, 
+	private boolean compareFileHierarchy(PollingJobWatchKey watchKey, Set<Kind<?>> kinds, 
 			WatchKeyReadyListener watchKeyReadyListener, TreeNode<TrackedFileEntry> currentState, TreeNode<TrackedFileEntry> previousState) {
 		CollatingByPathFileTreeComparisonEventHandler handler = new CollatingByPathFileTreeComparisonEventHandler(kinds);
 		FileHierarchyHelper.compareFileTreeHierarchies(handler, previousState, currentState);
