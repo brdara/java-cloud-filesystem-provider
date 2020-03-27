@@ -39,6 +39,8 @@ import com.sun.nio.file.ExtendedWatchEventModifier;
  * 
  * @author brdar
  */
+// TODO: Add an MBean to the class so that we can collect statistics around how long it takes to list directories,
+// how many files/directories were traversed, etc.
 @PersistJobDataAfterExecution
 @DisallowConcurrentExecution
 public class PollingWatchServiceJob implements Job {
