@@ -5,7 +5,6 @@ import java.nio.file.WatchEvent.Kind;
 import java.nio.file.WatchEvent.Modifier;
 import java.nio.file.WatchKey;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -19,16 +18,22 @@ import org.quartz.TriggerKey;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.google.common.collect.Sets;
 import com.uk.xarixa.cloud.filesystem.core.nio.CloudPath;
 import com.uk.xarixa.cloud.filesystem.core.scheduling.SchedulingService;
 
-public class PollingCloudWatchService implements CloudWatchService {
+/**
+ * Cloud watch service
+ * 
+ * @author brdar
+ */
+public class PollingCloudWatchService implements CloudWatchService, WatchKeyReadyListener {
 	public static final String JOB_GROUP_NAME = "PollingCloudWatchService";
 	private static final Logger LOG = LoggerFactory.getLogger(PollingCloudWatchService.class);
 	private final long pollTimeMs;
 	private final List<TriggerKey> triggers = new ArrayList<>();
 	private final List<PollingJobWatchKey> watchKeys = new ArrayList<>();
-	private final LinkedBlockingDeque<PollingJobWatchKey> watchKeysReady = new LinkedBlockingDeque<>();
+	private final LinkedBlockingDeque<PollingJobWatchKey> watchKeysReady = new LinkedBlockingDeque<>(20);
 
 	protected PollingCloudWatchService(long pollTimeMs) {
 		this.pollTimeMs = pollTimeMs;
@@ -71,14 +76,14 @@ public class PollingCloudWatchService implements CloudWatchService {
 	@Override
 	public WatchKey register(CloudPath path, Kind<?>[] events, Modifier... modifiers) {
 		SchedulingService scheduler = SchedulingService.getInstance();
-		PollingJobWatchKey watchKey = new PollingJobWatchKey();
+		PollingJobWatchKey watchKey = new PollingJobWatchKey(path);
 		JobDataMap jobDataMap = new JobDataMap(
-				Map.of(PollingJob.JOB_PATH_KEY, path,
-						PollingJob.JOB_KIND_KEY, Arrays.asList(events),
-						PollingJob.JOB_MODIFIERS_KEY, Arrays.asList(modifiers),
-						PollingJob.JOB_WATCH_KEY, watchKey));
+				Map.of(PollingWatchServiceJob.JOB_KIND_KEY, Sets.newHashSet(events),
+						PollingWatchServiceJob.JOB_MODIFIERS_KEY, Sets.newHashSet(modifiers),
+						PollingWatchServiceJob.JOB_WATCH_KEY, watchKey,
+						PollingWatchServiceJob.JOB_WATCH_KEY_READY_LISTENER, this));
 		String jobId = path.toString();
-		JobDetail jobDetail = scheduler.createJob(jobId, JOB_GROUP_NAME, PollingJob.class, jobDataMap);
+		JobDetail jobDetail = scheduler.createJob(jobId, JOB_GROUP_NAME, PollingWatchServiceJob.class, jobDataMap);
 		SimpleTrigger trigger = scheduler.createIntervalTrigger(jobId, JOB_GROUP_NAME, pollTimeMs);
 
 		TriggerKey triggerKey;
@@ -94,6 +99,25 @@ public class PollingCloudWatchService implements CloudWatchService {
 		triggers.add(triggerKey);
 
 		return watchKey;
+	}
+
+	@Override
+	public boolean watchKeyReady(PollingJobWatchKey watchKey) {
+		if (!watchKeysReady.contains(watchKey)) {
+			// TODO: As this runs in another thread we must still tell it that there are events awaiting...
+			if (!watchKeysReady.offer(watchKey)) {
+				watchKey.lastQueueAttemptFailed();
+				LOG.debug("Watch key ready list is full, flagging this watch key as last queue attempt failed: {}", watchKey);
+				return false;
+			} else {
+				watchKey.lastQueueAttemptSucceeded();
+				LOG.debug("Added to watch key ready list: {}", watchKey);
+				return true;
+			}
+		}
+
+		// The watch key is already in the ready queue
+		return true;
 	}
 
 }

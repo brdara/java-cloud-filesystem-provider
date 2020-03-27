@@ -1,5 +1,8 @@
 package com.uk.xarixa.cloud.filesystem.core.nio;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+
 import org.jmock.Expectations;
 import org.jmock.imposters.ByteBuddyClassImposteriser;
 import org.jmock.integration.junit4.JUnitRuleMockery;
@@ -50,4 +53,10 @@ public class FileSystemProviderHelperTest {
 		Assert.assertFalse(dirPaths.getRelativeSourcePath().isPresent());
 	}
 
+	@Test
+	public void testMd5Generator() throws IOException {
+		try (ByteArrayInputStream is = new ByteArrayInputStream("File 2_1".getBytes())) {
+			Assert.assertEquals("6e7307156b5a7c1fb00ba11021ff067a", FileSystemProviderHelper.calculateMD5Checksum(is));
+		}
+	}
 }

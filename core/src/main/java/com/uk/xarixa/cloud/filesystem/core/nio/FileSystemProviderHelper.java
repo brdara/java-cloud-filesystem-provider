@@ -1,6 +1,7 @@
 package com.uk.xarixa.cloud.filesystem.core.nio;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
 import java.net.URI;
 import java.nio.channels.FileChannel;
@@ -16,6 +17,8 @@ import java.nio.file.ProviderMismatchException;
 import java.nio.file.ProviderNotFoundException;
 import java.nio.file.StandardOpenOption;
 import java.nio.file.spi.FileSystemProvider;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -25,6 +28,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
@@ -425,6 +429,44 @@ public final class FileSystemProviderHelper {
 		public String toString() {
 			return ReflectionToStringBuilder.toString(this);
 		}
+	}
+
+	/**
+	 * Calculates the MD5 checksum for a given path by opening the file and reading it's contents.
+	 * @param path
+	 * @return
+	 * @throws IOException
+	 */
+	public static String calculateMD5Checksum(Path path) throws IOException {
+		if (!Files.isRegularFile(path)) {
+			throw new IllegalArgumentException("Path does not contain content: " + path.toString());
+		}
+		
+		try (InputStream is = Files.newInputStream(path, StandardOpenOption.READ)) {
+			return calculateMD5Checksum(is);
+		}
+
+	}
+		
+	/**
+	 * Calculates the MD5 checksum for a given path by opening the file and reading it's contents.
+	 */
+	public static String calculateMD5Checksum(InputStream is) throws IOException {
+		MessageDigest md;
+		try {
+			md = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			throw new RuntimeException("Unable to create MD5 message digest", e);
+		}
+
+		byte[] readBuffer = new byte[4096];
+
+		int readBytes;
+		while ( (readBytes = is.read(readBuffer)) != -1) {
+			md.update(readBuffer, 0, readBytes);
+		}
+
+		return Hex.encodeHexString(md.digest());
 	}
 
 }
