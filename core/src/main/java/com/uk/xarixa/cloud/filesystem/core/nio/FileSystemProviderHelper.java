@@ -380,14 +380,14 @@ public final class FileSystemProviderHelper {
 		public DirectoryIterationPaths(DirectoryIterationPaths sourceDirectoryIterationPaths, Path resultPath) {
 			this(sourceDirectoryIterationPaths.iterationStartPath,
 					sourceDirectoryIterationPaths.resultPath, resultPath);
-			LOG.debug("Created {} from {}, {}", this, sourceDirectoryIterationPaths, resultPath);
+			//LOG.debug("Created {} from {}, {}", this, sourceDirectoryIterationPaths, resultPath);
 		}
 
 		public DirectoryIterationPaths(Path iterationStartPath, Path sourcePath, Path resultPath) {
 			this.iterationStartPath = iterationStartPath;
 			this.sourcePath = sourcePath;
 			this.resultPath = resultPath;
-			LOG.debug("Created {} from {}, {}, {}", this, iterationStartPath, sourcePath, resultPath);
+			//LOG.debug("Created {} from {}, {}, {}", this, iterationStartPath, sourcePath, resultPath);
 		}
 		
 		public Path getIterationStartPath() {

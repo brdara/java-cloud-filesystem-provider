@@ -152,8 +152,8 @@ public class CopyCommand extends AbstractCliCommand {
 	    				sourceProvider.getScheme(), destinationProvider.getScheme());
 		    	int filesCopied = 0;
 
-		    	// Windows FS provider implemenation doesn't let you copy using it as the source
-	    		// to another destintation provider implementation like our cloud one, da-da-dumb
+		    	// Windows FS provider implementation doesn't let you copy using it as the source
+	    		// to another destination provider implementation like our cloud one, da-da-dumb
 	    		if (Files.isDirectory(sourcePath)) {
 	    			LOG.debug("Copying directory from a source local filesystem");
 	    			filesCopied = FileSystemProviderHelper.copyDirectoryBetweenProviders(sourcePath,

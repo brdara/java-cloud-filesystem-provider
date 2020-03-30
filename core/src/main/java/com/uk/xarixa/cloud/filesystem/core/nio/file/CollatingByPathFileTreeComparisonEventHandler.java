@@ -51,7 +51,7 @@ public class CollatingByPathFileTreeComparisonEventHandler implements FileTreeCo
 		boolean handleEvent = kinds.isEmpty();
 
 		if (!handleEvent) {
-			Kind<Path> kind = FileHierarchyHelper.fileTreeComparisonEventToWatchEventKind(event);
+			Kind<?> kind = FileHierarchyHelper.fileTreeComparisonEventToWatchEventKind(event);
 			handleEvent = kinds.contains(kind);
 		}
 

@@ -41,7 +41,7 @@ public final class FileHierarchyHelper {
 
 	private FileHierarchyHelper() {}
 
-	public static Kind<Path> fileTreeComparisonEventToWatchEventKind(FileTreeComparisonEvent event) {
+	public static Kind<?> fileTreeComparisonEventToWatchEventKind(FileTreeComparisonEvent event) {
 		switch (event.getResult()) {
 			case DIRECTORY_IS_FILE_MISMATCH: return StandardWatchEventKinds.ENTRY_MODIFY;
 			case FILE_DIGEST_MISMATCH: return StandardWatchEventKinds.ENTRY_MODIFY;
@@ -113,7 +113,7 @@ public final class FileHierarchyHelper {
 		subtreesRight.stream().filter(rightNode -> !foundRightList.contains(rightNode))
 			.forEach(rightNode -> {
 				// So we know this one doesn't exist on the left side as it was previously not found
-				eventHandler.handleEvent(new FileTreeComparisonEvent(rightNode.data().getPath(), treeLeft.data().getPath(),
+				eventHandler.handleEvent(new FileTreeComparisonEvent(treeLeft.data().getPath(), rightNode.data().getPath(),
 						ComparisonSide.RHS, ComparisonResult.MISSING_OTHER_SIDE));
 			});
 	}

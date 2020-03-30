@@ -28,16 +28,18 @@ public class PollingJobWatchKey implements WatchKey {
 	private Set<FileTreeComparisonWatchEvent> events = new HashSet<>();
 	private ReentrantLock eventsSetLock = new ReentrantLock();
 
-	class FileTreeComparisonWatchEvent implements WatchEvent<FileTreeComparisonEvent> {
+	class FileTreeComparisonWatchEvent implements WatchEvent<Object> {
 		private final FileTreeComparisonEvent event;
+		private Kind<Object> kind;
 
 		FileTreeComparisonWatchEvent(FileTreeComparisonEvent event) {
 			this.event = event;
+			this.kind = (Kind<Object>)FileHierarchyHelper.fileTreeComparisonEventToWatchEventKind(event);
 		}
 
 		@Override
-		public Kind<FileTreeComparisonEvent> kind() {
-			return null;
+		public Kind<Object> kind() {
+			return kind;
 		}
 
 		@Override
@@ -46,7 +48,7 @@ public class PollingJobWatchKey implements WatchKey {
 		}
 
 		@Override
-		public FileTreeComparisonEvent context() {
+		public Object context() {
 			return event;
 		}
 
